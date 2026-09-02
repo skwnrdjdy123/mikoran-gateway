@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /landing.html
+Allow: /favicon.svg
+Allow: /style.css
+Allow: /app.js
+Disallow: /api/admin/
+
+Sitemap: https://mikoran.cc/sitemap.xml

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Mikoran AI - 공식 통합 AI API 게이트웨이 플랫폼 & 개인 AI 브라우저</title>
+  <meta name="title" content="Mikoran AI - 공식 통합 AI API 게이트웨이 플랫폼 & 개인 AI 브라우저">
+  <meta name="description" content="Mikoran AI (미코란 AI) 공식 서버. Claude 3.7 Sonnet, Opus 5, GPT-4o 단일 엔드포인트 제공. 무제한 토큰, 부하 분산, 개인 AI 브라우저 및 초고속 SSE 스트리밍 게이트웨이.">
+  <meta name="keywords" content="mikoran, mikoran ai, mikoran gateway, 미코란, 미코란 AI, 미코란 게이트웨이, claude api, ai gateway, 프록시 서버, ai 브라우저">
+  <meta name="author" content="Mikoran AI">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook / KakaoTalk SEO -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mikoran.cc/">
+  <meta property="og:site_name" content="Mikoran AI">
+  <meta property="og:title" content="Mikoran AI - 공식 통합 AI API 게이트웨이 플랫폼">
+  <meta property="og:description" content="Mikoran AI (미코란 AI) 공식 서버. Claude 3.7 Sonnet, Opus 5, GPT-4o 무제한 토큰 및 고성능 API 프록시 엔드포인트.">
+  <meta property="og:image" content="https://mikoran.cc/favicon.svg">
+
+  <!-- Mikoran High-Tech Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="canonical" href="https://mikoran.cc/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .landing-hero {
+      text-align: center;
+      padding: 80px 20px 60px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .landing-title {
+      font-family: var(--font-display);
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 30%, #a78bfa 70%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+    .landing-sub {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .playground-section {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .landing-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(7, 9, 14, 0.85);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Nav -->
+  <nav class="landing-nav">
+    <div class="brand" style="border:none;padding:0;">
+      <div class="brand-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <div class="brand-info">
+        <span class="brand-title">Mikoran AI</span>
+        <span class="brand-subtitle">High-Speed API Gateway</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <a href="/browser" class="btn btn-primary" style="background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan));">🖥️ 개인 AI 브라우저 실행</a>
+      <a href="#playground" class="btn btn-secondary">온라인 테스트</a>
+      <a href="#key-section" class="btn btn-primary">API Key 신청</a>
+      <a href="/admin" class="btn btn-secondary">관리자 콘솔 🔑</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="landing-hero">
+    <div class="hero-badge">
+      <span class="status-dot pulse"></span>
+      <span>Mikoran Enterprise AI Platform & Workspace Browser</span>
+    </div>
+    <h1 class="landing-title">Mikoran AI 통합 API 프록시 & 개인 AI 브라우저</h1>
+    <p class="landing-sub">
+      Claude 3.7 Sonnet, Opus 5, Antigravity Gemini, Qwen Coder를 융합한 무제한 AI 플랫폼.<br>
+      다중 계정 자동 스위칭으로 한도가 초과되어도 **세션 맥락(Context)이 100% 끊김 없이 보존**되는 전용 AI 브라우저를 경험하세요.
+    </p>
+    <div class="hero-actions">
+      <a href="/browser" class="btn btn-primary" style="padding:14px 28px;font-size:1.05rem;background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan));">
+        🖥️ 개인 AI 브라우저 시작하기 🚀
+      </a>
+      <a href="#key-section" class="btn btn-secondary" style="padding:14px 28px;font-size:1.05rem;">
+        무료 API Key 즉시 발급 ⚡
+      </a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.15);color:var(--accent-purple);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3>개인 AI 브라우저 & 세션 지속성</h3>
+      <p>계정이 바뀌거나 한도가 초과되어도 백엔드 세션 메모리가 대화 맥락을 100% 기억하여 멈춤 없는 무제한 AI 코딩을 지원합니다.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/></svg>
+      </div>
+      <h3>할당량 제곱 확장 (Account Pool)</h3>
+      <p>여러 개의 업스트림 계정 및 API 키를 풀 형태로 묶어 할당량을 $N$배로 확장하고 0.01초 만에 자동 스위칭합니다.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:var(--accent-emerald);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <h3>Claude + Antigravity 하이브리드</h3>
+      <p>Claude의 추론/에이전트 기능과 Antigravity/Gemini의 대용량 컨텍스트 및 오프라인 로컬 AI를 자유롭게 융합하여 사용합니다.</p>
+    </div>
+  </section>
+
+  <!-- Key Request Self-Service Section -->
+  <section id="key-section" class="playground-section">
+    <div class="card glass-card" style="border-color:var(--accent-purple);">
+      <div class="card-header">
+        <h3>🔑 Mikoran API Key 셀프 즉시 발급</h3>
+        <span class="badge-emerald">Instant Activation</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-4">아래에 식별용 이름을 입력하시면 즉시 사용할 수 있는 게이트웨이 전용 API Key를 발급해 드립니다.</p>
+        
+        <form onsubmit="handleKeyRequest(event)" id="key-request-form">
+          <div class="form-group mb-3">
+            <label>프로젝트 / 개발자 이름</label>
+            <input type="text" id="req-name" required placeholder="예: Hong Gildong or My App" style="width:100%;">
+          </div>
+          <div class="form-group mb-3">
+            <label>이메일 주소 (선택)</label>
+            <input type="email" id="req-email" placeholder="user@example.com" style="width:100%;">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:10px;">
+            API Key 생성하기
+          </button>
+        </form>
+
+        <!-- Result Box with 1-Click Copy UI -->
+        <div id="key-result" style="display:none;margin-top:20px;">
+          <div class="code-box">
+            <div class="code-box-header">
+              <span>🔑 생성된 Mikoran API Key</span>
+              <button class="btn-copy" onclick="copyResultKey()">API Key 복사</button>
+            </div>
+            <pre><code id="generated-key-display">sk-gw-...</code></pre>
+          </div>
+
+          <div class="code-box" style="margin-top:12px;">
+            <div class="code-box-header">
+              <span>🌐 게이트웨이 사이트 URL (ANTHROPIC_BASE_URL)</span>
+              <button class="btn-copy" onclick="copyGatewayUrl()">URL 복사</button>
+            </div>
+            <pre><code id="gateway-url-display">http://localhost:3000</code></pre>
+          </div>
+
+          <div class="code-box" style="margin-top:12px;">
+            <div class="code-box-header">
+              <span>💻 1-클릭 Claude Code 연동 명령어 (PowerShell)</span>
+              <button class="btn-copy" onclick="copyPsCommand()">연동 명령어 전체 복사</button>
+            </div>
+            <pre><code id="ps-command-display">[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'http://localhost:3000', 'User')
+[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'sk-gw-...', 'User')</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Live Playground -->
+  <section id="playground" class="playground-section">
+    <div class="card glass-card">
+      <div class="card-header">
+        <h3>🧪 실시간 라이브 API 테스트기</h3>
+        <span class="badge-purple">Live Gateway Proxy Test</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group mb-3">
+          <label>사용할 모델 선택</label>
+          <select id="pg-model">
+            <option value="claude-3-7-sonnet">Claude 3.7 Sonnet (추천)</option>
+            <option value="claude-sonnet-5">Claude Sonnet 5</option>
+            <option value="claude-opus-5">Claude Opus 5</option>
+          </select>
+        </div>
+        <div class="form-group mb-3">
+          <label>프롬프트 입력</label>
+          <textarea id="pg-prompt" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border-color);border-radius:8px;padding:12px;color:#fff;font-family:var(--font-main);" placeholder="테스트할 질문을 입력하세요...">Mikoran AI 게이트웨이 연결 상태를 확인하기 위한 테스트 메시지입니다. 1문장으로 짧게 인사해줘.</textarea>
+        </div>
+        <button onclick="runPlaygroundTest()" class="btn btn-success" id="btn-pg-submit">
+          <span>테스트 실행 🚀</span>
+        </button>
+
+        <div class="code-box" style="margin-top:20px;">
+          <div class="code-box-header">
+            <span>응답 결과 (Response Output)</span>
+            <span id="pg-status" class="text-muted">대기 중</span>
+          </div>
+          <pre><code id="pg-output">// 실행 결과가 여기에 표시됩니다.</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="text-align:center;padding:40px;color:var(--text-muted);border-top:1px solid var(--border-color);margin-top:60px;">
+    <p>© 2026 Mikoran AI Platform & Personal Workspace Browser.</p>
+    <p style="margin-top:8px;">
+      <a href="/browser" style="color:var(--accent-cyan);margin-right:16px;text-decoration:none;">🖥️ 개인 AI 브라우저 실행 ➔</a>
+      <a href="/admin" style="color:var(--accent-purple);text-decoration:none;">Mikoran 관리자 전용 대시보드 로그인 ➔</a>
+    </p>
+  </footer>
+
+  <script>
+    let currentGeneratedKey = '';
+    const currentGatewayUrl = window.location.origin;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('gateway-url-display').textContent = currentGatewayUrl;
+    });
+
+    async function handleKeyRequest(e) {
+      e.preventDefault();
+      const name = document.getElementById('req-name').value;
+      const email = document.getElementById('req-email').value;
+
+      try {
+        const res = await fetch('/api/admin/request-key', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name, email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentGeneratedKey = data.apiKey;
+          document.getElementById('generated-key-display').textContent = data.apiKey;
+          document.getElementById('gateway-url-display').textContent = currentGatewayUrl;
+          
+          const psCode = `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', '${currentGatewayUrl}', 'User')\n[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', '${data.apiKey}', 'User')`;
+          document.getElementById('ps-command-display').textContent = psCode;
+          
+          document.getElementById('key-result').style.display = 'block';
+        } else {
+          alert('키 생성 실패: ' + data.error);
+        }
+      } catch (err) {
+        alert('에러 발생: ' + err.message);
+      }
+    }
+
+    function copyResultKey() {
+      navigator.clipboard.writeText(currentGeneratedKey);
+      alert('Mikoran API Key가 클립보드에 복사되었습니다!');
+    }
+
+    function copyGatewayUrl() {
+      navigator.clipboard.writeText(currentGatewayUrl);
+      alert('게이트웨이 URL (' + currentGatewayUrl + ') 이 클립보드에 복사되었습니다!');
+    }
+
+    function copyPsCommand() {
+      const cmd = document.getElementById('ps-command-display').textContent;
+      navigator.clipboard.writeText(cmd);
+      alert('1-클릭 Claude Code 연동 명령어가 클립보드에 복사되었습니다!');
+    }
+
+    async function runPlaygroundTest() {
+      const model = document.getElementById('pg-model').value;
+      const prompt = document.getElementById('pg-prompt').value;
+      const btn = document.getElementById('btn-pg-submit');
+      const statusEl = document.getElementById('pg-status');
+      const outputEl = document.getElementById('pg-output');
+
+      if (!currentGeneratedKey) {
+        currentGeneratedKey = 'sk-gateway-unlimited-demo-key';
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = '요청 중...';
+      outputEl.textContent = 'Mikoran 게이트웨이를 통해 모델로 요청을 보내는 중...';
+
+      try {
+        const res = await fetch('/v1/messages', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': currentGeneratedKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: model,
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        const data = await res.json();
+        statusEl.textContent = res.status + ' OK';
+        outputEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        statusEl.textContent = '에러 발생';
+        outputEl.textContent = '에러: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

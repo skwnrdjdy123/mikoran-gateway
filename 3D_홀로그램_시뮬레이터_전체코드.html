@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>3D Hologram Simulator</title>
+<style>
+body { margin: 0; overflow: hidden; background: #050811; color: #38bdf8; font-family: 'Fira Code', monospace; }
+#c { width: 100vw; height: 100vh; display: block; cursor: grab; }
+#c:active { cursor: grabbing; }
+#hud { position: absolute; top: 14px; left: 14px; background: rgba(15,23,42,0.88); border: 1px solid #38bdf8; padding: 10px 16px; border-radius: 12px; font-size: 0.78rem; box-shadow: 0 0 20px rgba(56,189,248,0.3); backdrop-filter: blur(8px); pointer-events: none; }
+#timeline-hud { position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.92); border: 1px solid #38bdf8; padding: 8px 14px; border-radius: 20px; box-shadow: 0 0 20px rgba(56,189,248,0.3); z-index: 25; backdrop-filter: blur(8px); }
+#controls-hud { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 6px; background: rgba(15,23,42,0.92); border: 1px solid #a855f7; padding: 8px 14px; border-radius: 24px; box-shadow: 0 0 20px rgba(168,85,247,0.3); z-index: 20; justify-content: center; align-items: center; }
+button.h-btn { background: #0f172a; border: 1px solid #38bdf8; color: #5eead4; padding: 4px 10px; border-radius: 14px; font-size: 0.75rem; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+button.h-btn:hover { background: #0284c7; color: #fff; box-shadow: 0 0 10px #38bdf8; }
+input.h-input { background: #0f172a; border: 1px solid #a855f7; color: #5eead4; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; text-align: center; width: 75px; }
+input.h-input:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div>✨ <strong>3D UNIVERSAL DYNAMIC HOLOGRAPHIC PHYSICS SIMULATOR</strong></div>
+  <div style="color:#cbd5e1;margin-top:4px;">🖱️ <strong>마우스 휠 스크롤</strong>: 줌인/줌아웃 | <strong>휠 클릭 드래그</strong>: 360도 시점 회전</div>
+  <div id="stats-text" style="color:#a78bfa;margin-top:4px;font-weight:bold;">입자 갯수: 1,500개 | 실시간 AI 3D 모핑 활성화</div>
+</div>
+
+<div id="timeline-hud">
+  <button class="h-btn" id="btn-play" onclick="togglePlay()" style="border-color:#34d399;color:#6ee7b7;">⏸️ 일시정지</button>
+  <button class="h-btn" onclick="seekRelative(-1.0)">⏪ -1초</button>
+  <button class="h-btn" onclick="seekRelative(1.0)">⏩ +1초</button>
+  <button class="h-btn" onclick="restartSim()">🔄 처음부터</button>
+  <input type="range" id="timeline-slider" min="0" max="1000" value="0" oninput="onSeekInput(this.value)" style="width:120px;accent-color:#38bdf8;cursor:pointer;">
+  <span id="time-display" style="color:#38bdf8;font-size:0.75rem;font-weight:bold;min-width:65px;">00:00.0s</span>
+</div>
+
+<div id="controls-hud">
+  <button class="h-btn" onclick="morphTo(0)">🌀 도넛</button>
+  <button class="h-btn" onclick="morphTo(1)">🌐 동그라미/구체</button>
+  <button class="h-btn" onclick="morphTo(2)">🧊 네모/큐브</button>
+  <button class="h-btn" onclick="morphTo(3)">⚛️ 양자 파동</button>
+  <button class="h-btn" onclick="morphTo(7, '🤖 3D 로봇/인간 비행 시뮬레이션')">🤖 인간/로봇 비행</button>
+  <button class="h-btn" onclick="morphTo(8, '🏢 3D 건물 붕괴 파쇄 시뮬레이션')">🏢 건물 붕괴</button>
+  <button class="h-btn" onclick="morphTo(9, '✈️ 3D 비행기/전투기 주행 시뮬레이션')">✈️ 비행기 주행</button>
+  <button class="h-btn" onclick="morphTo(6, '🏎️ 3D 스포츠카 벽 충돌 시뮬레이션')" style="border-color:#ef4444;color:#fca5a5;">🏎️ 스포츠카 충돌</button>
+  <span style="color:#a855f7;font-size:0.8rem;align-self:center;font-weight:bold;margin-left:6px;">⚡ 입자 수 직접 입력:</span>
+  <input type="number" class="h-input" id="particle-input" value="1500" min="100" max="20000" step="100" onchange="changeParticleCount(this.value)" onkeyup="if(event.key==='Enter')changeParticleCount(this.value)">
+  <button class="h-btn" onclick="changeParticleCount(500)" style="border-color:#a855f7;color:#d8b4fe;">500</button>
+  <button class="h-btn" onclick="changeParticleCount(1500)" style="border-color:#a855f7;color:#d8b4fe;">1,500</button>
+  <button class="h-btn" onclick="changeParticleCount(3000)" style="border-color:#a855f7;color:#d8b4fe;">3,000</button>
+  <button class="h-btn" onclick="changeParticleCount(5000)" style="border-color:#a855f7;color:#d8b4fe;">5,000</button>
+  <button class="h-btn" onclick="changeParticleCount(10000)" style="border-color:#a855f7;color:#d8b4fe;">10,000</button>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+let count = 1500;
+let currentMode = 1;
+let zoom = 1.0;
+let rotX = 0, rotY = 0;
+let targetRotX = 0, targetRotY = 0;
+let isWheelDown = false;
+let isPlaying = true;
+let simTime = 0.0;
+const duration = 10.0;
+
+let customPointsArray = null;
+let particles = [];
+
+function initBaseParticles(cnt) {
+  cnt = parseInt(cnt, 10) || 1500;
+  cnt = Math.max(100, Math.min(20000, cnt));
+  const pts = [];
+  for (let i = 0; i < cnt; i++) {
+    pts.push({
+      x: (Math.random() - 0.5) * 300,
+      y: (Math.random() - 0.5) * 300,
+      z: (Math.random() - 0.5) * 300,
+      color: '#38bdf8',
+      vx: (Math.random() - 0.5) * 8,
+      vy: (Math.random() - 0.5) * 8,
+      vz: (Math.random() - 0.5) * 8,
+      seed: Math.random()
+    });
+  }
+  return pts;
+}
+
+particles = initBaseParticles(count);
+
+// 0: Torus (도넛)
+function getTorusPoint(i, cnt, t) {
+  const u = (i / cnt) * Math.PI * 2;
+  const v = (i % 30) / 30 * Math.PI * 2;
+  const r1 = 150, r2 = 50;
+  return { x: (r1 + r2 * Math.cos(v)) * Math.cos(u), y: (r1 + r2 * Math.cos(v)) * Math.sin(u), z: r2 * Math.sin(v), color: '#38bdf8' };
+}
+
+// 1: Dynamic Pulsing Sphere / Circle (동그라미 / 3D 구체)
+function getSpherePoint(i, cnt, t) {
+  const u = (i / cnt) * Math.PI * 2;
+  const v = Math.acos(2 * (i / cnt) - 1);
+  const pulse = Math.sin(t * 2 + i * 0.05) * 15;
+  const r = 160 + pulse;
+  return { x: r * Math.sin(v) * Math.cos(u), y: r * Math.sin(v) * Math.sin(u), z: r * Math.cos(v), color: (i % 2 === 0 ? '#38bdf8' : '#a855f7') };
+}
+
+// 2: Cube (네모 / 3D 큐브)
+function getCubePoint(i, cnt, t) {
+  const side = Math.cbrt(cnt);
+  const ix = i % side, iy = Math.floor(i / side) % side, iz = Math.floor(i / (side * side));
+  return { x: (ix / side - 0.5) * 260, y: (iy / side - 0.5) * 260, z: (iz / side - 0.5) * 260, color: '#5eead4' };
+}
+
+// 3: Wave (파동 / 물결)
+function getWavePoint(i, cnt, t) {
+  const side = Math.sqrt(cnt);
+  const ix = i % side, iz = Math.floor(i / side);
+  const x = (ix / side - 0.5) * 360;
+  const z = (iz / side - 0.5) * 360;
+  const y = Math.sin(x * 0.025 + t * 3) * Math.cos(z * 0.025 + t * 3) * 60;
+  return { x: x, y: y, z: z, color: '#34d399' };
+}
+
+// 4: Bitten Donut (베어 문 도넛)
+function getBittenDonutPoint(i, cnt, t) {
+  const u = (i / cnt) * Math.PI * 2;
+  const v = (i % 30) / 30 * Math.PI * 2;
+  const r1 = 150, r2 = 50;
+  let x = (r1 + r2 * Math.cos(v)) * Math.cos(u);
+  let y = (r1 + r2 * Math.cos(v)) * Math.sin(u);
+  let z = r2 * Math.sin(v);
+  const normT = t / duration;
+  if (normT > 0.25 && u > 0.2 && u < 1.4) {
+    const biteProgress = Math.min(1.0, (normT - 0.25) * 3.0);
+    x *= 1.0 - 0.52 * biteProgress;
+    y *= 1.0 - 0.52 * biteProgress;
+  }
+  return { x: x, y: y, z: z, color: (u > 0.2 && u < 1.4) ? '#f43f5e' : '#38bdf8' };
+}
+
+// 5: Black Hole Spiral (블랙홀)
+function getBlackHolePoint(i, cnt, t) {
+  const normT = t / duration;
+  const angle = i * 0.08 + normT * 12.0;
+  const baseDist = Math.random() * 210 + 15;
+  const dist = baseDist * (1.0 - normT * 0.75);
+  const spiral = angle + dist * 0.04;
+  return { x: dist * Math.cos(spiral), y: (Math.random() - 0.5) * (dist * 0.25), z: dist * Math.sin(spiral), color: (i % 2 === 0) ? '#38bdf8' : '#e11d48' };
+}
+
+// 6: 3D Sports Car Crash (스포츠카 벽 충돌)
+function getCarCrashPoint(i, cnt, t) {
+  const normT = t / duration;
+  const wallX = 100;
+  const p = (particles && particles[i]) ? particles[i] : { seed: 0.5, vx: 2, vy: 1, vz: 0 };
+  const ratio = i / cnt;
+
+  let relX = 0, relY = 0, relZ = 0;
+  let color = '#38bdf8';
+
+  if (ratio < 0.18) {
+    const wheelIdx = Math.floor(ratio / 0.045);
+    const wx = (wheelIdx % 2 === 0 ? -70 : 70);
+    const wz = (wheelIdx < 2 ? -45 : 45);
+    const angle = (i * 0.4) + (normT * 30.0);
+    const wr = 26;
+    relX = wx + wr * Math.cos(angle);
+    relY = wr * Math.sin(angle) - 15;
+    relZ = wz + (Math.random() - 0.5) * 12;
+    color = '#94a3b8';
+  } else if (ratio < 0.55) {
+    const bx = (Math.random() - 0.5) * 220;
+    const by = (Math.random() - 0.5) * 35;
+    const bz = (Math.random() - 0.5) * 90;
+    relX = bx; relY = by - 5; relZ = bz;
+    color = bx > 30 ? '#ef4444' : '#0284c7';
+  } else if (ratio < 0.80) {
+    const rx = (Math.random() - 0.5) * 100 - 10;
+    const ry = Math.random() * 45 + 15;
+    const rz = (Math.random() - 0.5) * 75;
+    relX = rx; relY = ry; relZ = rz;
+    color = '#5eead4';
+  } else {
+    if (i % 2 === 0) {
+      relX = 110 + (Math.random() - 0.5) * 10; relY = (Math.random() - 0.5) * 15; relZ = (i % 4 === 0 ? -38 : 38); color = '#fef08a';
+    } else {
+      relX = -110 + (Math.random() - 0.5) * 10; relY = (Math.random() - 0.5) * 15; relZ = (i % 4 === 1 ? -38 : 38); color = '#f43f5e';
+    }
+  }
+
+  if (normT < 0.35) {
+    const carProgress = normT / 0.35;
+    const startX = -260 + carProgress * 330;
+    return { x: startX + relX, y: relY, z: relZ, color: color };
+  } else {
+    const crashT = (normT - 0.35) / 0.65;
+    const isDebris = (p.seed || 0.5) > 0.28;
+    if (isDebris) {
+      const speed = crashT * 320;
+      return {
+        x: wallX + relX * (1 - crashT) + (p.vx || 2) * speed,
+        y: relY + (p.vy || 1) * speed - crashT * crashT * 120,
+        z: relZ + (p.vz || 0) * speed,
+        color: crashT < 0.3 ? '#f97316' : '#64748b'
+      };
+    } else {
+      return { x: wallX - 30 + relX * 0.25, y: relY * 0.7, z: relZ * 1.3, color: '#dc2626' };
+    }
+  }
+}
+
+// 7: 3D Humanoid Robot / Human Flying (사람 / 로봇 하늘 비행)
+function getHumanoidPoint(i, cnt, t) {
+  const normT = t / duration;
+  const ratio = i / cnt;
+  let x = 0, y = 0, z = 0, color = '#38bdf8';
+
+  if (ratio < 0.15) {
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.acos(2 * Math.random() - 1);
+    const r = 25;
+    x = r * Math.sin(v) * Math.cos(u);
+    y = 110 + r * Math.sin(v) * Math.sin(u);
+    z = r * Math.cos(v);
+    color = '#fef08a';
+  } else if (ratio < 0.55) {
+    x = (Math.random() - 0.5) * 60;
+    y = 30 + (Math.random() - 0.5) * 100;
+    z = (Math.random() - 0.5) * 45;
+    color = '#0284c7';
+  } else if (ratio < 0.75) {
+    const isLeft = i % 2 === 0;
+    x = (Math.random() - 0.5) * 30 + (isLeft ? -50 : 50);
+    y = 70 + (Math.random() - 0.5) * 80;
+    z = Math.random() * 90 + 20;
+    color = '#38bdf8';
+  } else {
+    const speed = (normT * 100 + i * 2) % 180;
+    x = (Math.random() - 0.5) * 40;
+    y = -60 - speed;
+    z = (Math.random() - 0.5) * 30;
+    color = speed < 60 ? '#ef4444' : '#f97316';
+  }
+
+  const flyY = Math.sin(t * 3) * 20;
+  return { x: x, y: y + flyY, z: z, color: color };
+}
+
+// 8: 3D Building Collapse (건물 붕괴)
+function getBuildingPoint(i, cnt, t) {
+  const normT = t / duration;
+  const ratio = i / cnt;
+  const floorIdx = Math.floor(ratio * 12);
+  const baseHeight = floorIdx * 25 - 120;
+  const p = (particles && particles[i]) ? particles[i] : { vx: (Math.random() - 0.5) * 6, vy: -5 };
+
+  if (normT < 0.3) {
+    const x = (Math.random() - 0.5) * 120;
+    const y = baseHeight;
+    const z = (Math.random() - 0.5) * 120;
+    return { x, y, z, color: '#38bdf8' };
+  } else {
+    const fallT = (normT - 0.3) / 0.7;
+    const collapseT = Math.max(0, fallT - (12 - floorIdx) * 0.05);
+    const x = (Math.random() - 0.5) * (120 + collapseT * 260) + p.vx * collapseT * 40;
+    const y = baseHeight * (1 - collapseT * 0.8) - collapseT * collapseT * 140;
+    const z = (Math.random() - 0.5) * (120 + collapseT * 260);
+    return { x, y, z, color: collapseT > 0.4 ? '#f97316' : '#64748b' };
+  }
+}
+
+// 9: 3D Airplane Flight (비행기 / 전투기 비행)
+function getAirplanePoint(i, cnt, t) {
+  const ratio = i / cnt;
+  let x = 0, y = 0, z = 0, color = '#38bdf8';
+
+  if (ratio < 0.4) {
+    x = (Math.random() - 0.5) * 260;
+    y = (Math.random() - 0.5) * 30;
+    z = (Math.random() - 0.5) * 30;
+    color = '#e2e8f0';
+  } else if (ratio < 0.75) {
+    const wingX = (Math.random() - 0.5) * 80;
+    const wingZ = (Math.random() - 0.5) * 280;
+    x = wingX - Math.abs(wingZ) * 0.4;
+    y = (Math.random() - 0.5) * 12;
+    z = wingZ;
+    color = '#0284c7';
+  } else {
+    const trail = Math.random() * 200;
+    x = -140 - trail;
+    y = (Math.random() - 0.5) * 20;
+    z = (i % 2 === 0 ? -60 : 60);
+    color = '#94a3b8';
+  }
+
+  const bankRoll = Math.sin(t * 2) * 15;
+  return { x, y: y + bankRoll, z, color };
+}
+
+// 10: 3D Animal / Cat Shape (동물 / 고양이 형체)
+function getAnimalPoint(i, cnt, t) {
+  const ratio = i / cnt;
+  let x = 0, y = 0, z = 0, color = '#f59e0b';
+
+  if (ratio < 0.2) {
+    const isEar = ratio < 0.05;
+    if (isEar) {
+      x = 80 + (Math.random() - 0.5) * 20;
+      y = 60 + Math.random() * 30;
+      z = (i % 2 === 0 ? -25 : 25);
+    } else {
+      const u = Math.random() * Math.PI * 2;
+      const v = Math.acos(2 * Math.random() - 1);
+      const r = 35;
+      x = 70 + r * Math.sin(v) * Math.cos(u);
+      y = 30 + r * Math.sin(v) * Math.sin(u);
+      z = r * Math.cos(v);
+    }
+  } else if (ratio < 0.7) {
+    x = (Math.random() - 0.5) * 140 - 10;
+    y = (Math.random() - 0.5) * 50;
+    z = (Math.random() - 0.5) * 45;
+    color = '#d97706';
+  } else if (ratio < 0.85) {
+    const pawIdx = Math.floor((ratio - 0.7) / 0.0375);
+    const px = (pawIdx < 2 ? 50 : -60);
+    const pz = (pawIdx % 2 === 0 ? -30 : 30);
+    const legSwing = Math.sin(t * 8 + pawIdx * Math.PI) * 25;
+    x = px + legSwing;
+    y = -50 + Math.cos(t * 8 + pawIdx * Math.PI) * 15;
+    z = pz;
+  } else {
+    const tailT = Math.random();
+    x = -80 - tailT * 60;
+    y = Math.sin(tailT * 3 + t * 4) * 40 + tailT * 30;
+    z = (Math.random() - 0.5) * 15;
+    color = '#b45309';
+  }
+
+  return { x, y, z, color };
+}
+
+// 11: 3D Liquid Magma Explosion (액체 화산 폭발)
+function getExplosionPoint(i, cnt, t) {
+  const normT = (t * 0.5) % 1.0;
+  const p = (particles && particles[i]) ? particles[i] : { vx: (Math.random() - 0.5) * 12, vy: Math.random() * 12, vz: (Math.random() - 0.5) * 12 };
+  const speed = normT * 360;
+
+  return {
+    x: p.vx * speed,
+    y: p.vy * speed - normT * normT * 180,
+    z: p.vz * speed,
+    color: normT < 0.3 ? '#ef4444' : (normT < 0.6 ? '#f97316' : '#78716c')
+  };
+}
+
+const shapeGenerators = [
+  getTorusPoint,        // 0: Torus
+  getSpherePoint,       // 1: Sphere / Circle (동그라미)
+  getCubePoint,         // 2: Cube / Box (네모)
+  getWavePoint,         // 3: Wave (파동)
+  getBittenDonutPoint,  // 4: Bitten Donut
+  getBlackHolePoint,    // 5: Black Hole
+  getCarCrashPoint,     // 6: Car Crash
+  getHumanoidPoint,     // 7: Humanoid Flying
+  getBuildingPoint,     // 8: Building Collapse
+  getAirplanePoint,     // 9: Airplane Flight
+  getAnimalPoint,       // 10: Animal Cat
+  getExplosionPoint     // 11: Liquid Explosion
+];
+
+function changeParticleCount(newCount) {
+  count = parseInt(newCount, 10) || 1500;
+  count = Math.max(100, Math.min(20000, count));
+  particles = initBaseParticles(count);
+  const input = document.getElementById('particle-input');
+  if (input) input.value = count;
+  const statsText = document.getElementById('stats-text');
+  if (statsText) statsText.innerText = '입자 갯수: ' + count.toLocaleString() + '개 | 3D 모핑 활성화';
+}
+window.changeParticleCount = changeParticleCount;
+
+function morphTo(idx, title) {
+  customPointsArray = null;
+  currentMode = idx;
+  simTime = 0;
+  isPlaying = true;
+  const btn = document.getElementById('btn-play');
+  if (btn) btn.innerText = '⏸️ 일시정지';
+  if (title) {
+    const statsText = document.getElementById('stats-text');
+    if (statsText) statsText.innerText = '🔮 3D 미래 시뮬레이션: ' + title;
+  }
+}
+window.morphTo = morphTo;
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('btn-play');
+  if (btn) btn.innerText = isPlaying ? '⏸️ 일시정지' : '▶️ 재생';
+}
+window.togglePlay = togglePlay;
+
+function seekRelative(deltaSec) {
+  simTime = Math.max(0, Math.min(duration, simTime + deltaSec));
+  updateTimelineUI();
+}
+window.seekRelative = seekRelative;
+
+function restartSim() {
+  simTime = 0;
+  isPlaying = true;
+  const btn = document.getElementById('btn-play');
+  if (btn) btn.innerText = '⏸️ 일시정지';
+  updateTimelineUI();
+}
+window.restartSim = restartSim;
+
+function onSeekInput(val) {
+  simTime = (val / 1000) * duration;
+  updateTimelineUI();
+}
+window.onSeekInput = onSeekInput;
+
+function updateTimelineUI() {
+  const slider = document.getElementById('timeline-slider');
+  const timeDisp = document.getElementById('time-display');
+  if (slider) slider.value = Math.floor((simTime / duration) * 1000);
+  if (timeDisp) timeDisp.innerText = simTime.toFixed(1) + 's / 10s';
+}
+
+// Universal PostMessage Receiver for Mode or AI Custom 3D Point Payload
+window.addEventListener('message', (e) => {
+  if (e.data && (e.data.type === 'MORPH_SIMULATION' || e.data.type === 'SET_CUSTOM_3D_PARTICLES')) {
+    if (e.data.points && Array.isArray(e.data.points)) {
+      customPointsArray = e.data.points;
+      simTime = 0;
+    } else {
+      customPointsArray = null;
+      const mode = (e.data.mode !== undefined) ? e.data.mode : 1;
+      morphTo(mode, e.data.title || '실시간 3D 파티클 형상 모핑 중');
+    }
+    if (e.data.title) {
+      const statsText = document.getElementById('stats-text');
+      if (statsText) statsText.innerText = '🔮 3D 실시간 재현: ' + e.data.title;
+    }
+  }
+});
+
+window.addEventListener('mousedown', (e) => {
+  if (e.button === 1 || e.buttons === 4) {
+    isWheelDown = true;
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mouseup', (e) => {
+  if (e.button === 1) isWheelDown = false;
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (isWheelDown || e.buttons === 4) {
+    targetRotY += (e.movementX || 0) * 0.008;
+    targetRotX += (e.movementY || 0) * 0.008;
+  }
+});
+
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoom -= e.deltaY * 0.0015;
+  zoom = Math.max(0.3, Math.min(4.0, zoom));
+}, { passive: false });
+
+function loop() {
+  requestAnimationFrame(loop);
+  try {
+    ctx.fillStyle = 'rgba(5, 8, 17, 0.40)';
+    ctx.fillRect(0, 0, width, height);
+
+    if (isPlaying) {
+      simTime += 0.033;
+      if (simTime > duration) simTime = 0;
+      updateTimelineUI();
+    }
+
+    rotX += (targetRotX - rotX) * 0.1;
+    rotY += (targetRotY - rotY) * 0.1;
+    targetRotY += 0.003;
+
+    const cx = width / 2;
+    const cy = height / 2;
+    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+
+    const genFn = shapeGenerators[currentMode] || shapeGenerators[1];
+    const renderBuffer = [];
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      if (!p) continue;
+
+      let target = null;
+      if (customPointsArray && customPointsArray[i]) {
+        target = customPointsArray[i];
+      } else {
+        target = genFn(i, particles.length, simTime) || { x: 0, y: 0, z: 0, color: '#38bdf8' };
+      }
+
+      p.x += (target.x - p.x) * 0.14;
+      p.y += (target.y - p.y) * 0.14;
+      p.z += (target.z - p.z) * 0.14;
+      p.color = target.color || '#38bdf8';
+
+      let x1 = p.x * cosY - p.z * sinY;
+      let z1 = p.z * cosY + p.x * sinY;
+      let y1 = p.y * cosX - z1 * sinX;
+      let z2 = z1 * cosX + p.y * sinX;
+
+      let scale = (350 / (350 + z2)) * zoom;
+      let rx = cx + x1 * scale;
+      let ry = cy + y1 * scale;
+      let size = Math.max(1, 2.8 * scale);
+
+      renderBuffer.push({ rx, ry, z2, size, color: p.color });
+    }
+
+    renderBuffer.sort((a, b) => b.z2 - a.z2);
+
+    ctx.lineWidth = 0.6;
+    const maxLineDist = 32 * zoom;
+    const step = Math.max(1, Math.floor(renderBuffer.length / 350));
+    for (let i = 0; i < renderBuffer.length; i += step) {
+      const p1 = renderBuffer[i];
+      if (p1.z2 > 280) continue;
+      for (let j = i + step; j < Math.min(renderBuffer.length, i + step * 6); j += step) {
+        const p2 = renderBuffer[j];
+        const dx = p1.rx - p2.rx;
+        const dy = p1.ry - p2.ry;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < maxLineDist * maxLineDist) {
+          const alpha = (1.0 - Math.sqrt(distSq) / maxLineDist) * 0.35;
+          ctx.strokeStyle = p1.color.startsWith('#ef') ? `rgba(239, 68, 68, ${alpha})` : `rgba(56, 189, 248, ${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(p1.rx, p1.ry);
+          ctx.lineTo(p2.rx, p2.ry);
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (let i = 0; i < renderBuffer.length; i++) {
+      const p = renderBuffer[i];
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.rx, p.ry, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+  } catch (err) {
+    console.error('Render Loop Error:', err);
+  }
+}
+
+loop();
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>

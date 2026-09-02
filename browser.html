@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+  <title>Mikoran AI Browser - Personal Workspace & Quota Multiplier</title>
+
+  <!-- Mikoran High-Tech AI Logo Favicon -->
+  <link rel="icon" type="image/png" href="/mikoran.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css?v=6">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #090d16;
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #ffffff;
+    }
+
+    .browser-window-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0e131f;
+      border-bottom: 1px solid #1e293b;
+      padding: 6px 16px 0 16px;
+      user-select: none;
+    }
+
+    .browser-tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+
+    .browser-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #cbd5e1 !important;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 140px;
+      max-width: 220px;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .browser-tab:hover {
+      background: #334155;
+      color: #ffffff !important;
+    }
+
+    .browser-tab.active {
+      background: #121824;
+      border-color: #8b5cf6;
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+
+    .browser-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: linear-gradient(90deg, #8b5cf6, #38bdf8);
+    }
+
+    .tab-close {
+      margin-left: auto;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .tab-close:hover {
+      background: rgba(239, 68, 68, 0.4);
+      color: #ffffff !important;
+    }
+
+    .btn-new-tab {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .btn-new-tab:hover {
+      background: #1e293b;
+      color: #ffffff !important;
+    }
+
+    .browser-nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #111726;
+      border-bottom: 1px solid #1e293b;
+      padding: 6px 12px;
+      flex-wrap: wrap;
+    }
+
+    .address-bar {
+      flex: 1 1 180px;
+      min-width: 120px;
+      display: flex;
+      align-items: center;
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 4px 12px;
+      gap: 6px;
+    }
+
+    .address-bar input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff !important;
+      width: 100%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .address-bar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399 !important;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .browser-workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .workspace-pane-left {
+      flex: 1;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #1e293b;
+      background: #090d16;
+    }
+
+    .workspace-pane-right {
+      flex: 1;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      background: #0d121c;
+      border-left: 1px solid #1e293b;
+    }
+
+    .chat-stream-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chat-input-wrapper {
+      padding: 12px;
+      border-top: 1px solid #1e293b;
+      background: #0e131f;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-input-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chat-textarea {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #ffffff;
+      font-size: 0.92rem;
+      outline: none;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .sandbox-tabs {
+      display: flex;
+      background: #090d16;
+      border-bottom: 1px solid #1e293b;
+      overflow-x: auto;
+    }
+
+    .sandbox-tab {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .sandbox-tab.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
+      background: #0d121c;
+      font-weight: 700;
+    }
+
+    /* Jailbreak Godmode Toggle Switch UI */
+    .jailbreak-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .jailbreak-toggle-btn.active {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(168, 85, 247, 0.3));
+      border: 1.5px solid #ef4444;
+      color: #fecaca !important;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .jailbreak-toggle-btn.inactive {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #94a3b8 !important;
+    }
+
+    .jailbreak-toggle-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .jailbreak-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: all 0.25s ease;
+    }
+
+    .jailbreak-toggle-btn.active .jailbreak-indicator {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulse-glow 1.4s infinite alternate;
+    }
+
+    .jailbreak-toggle-btn.inactive .jailbreak-indicator {
+      background: #64748b;
+      box-shadow: none;
+    }
+
+    @keyframes pulse-glow {
+      from { transform: scale(0.85); opacity: 0.6; }
+      to { transform: scale(1.2); opacity: 1; }
+    }
+
+    .sandbox-content {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+    }
+
+    #sandbox-preview-frame {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .quota-drawer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(167, 139, 250, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .btn-nav-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* 🔮 Bixby/Siri Style Center Screen Futuristic AI Voice Assistant HUD */
+    .voice-hud-overlay {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.88);
+      z-index: 10000;
+      pointer-events: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .voice-hud-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .voice-hud-card {
+      background: rgba(9, 13, 24, 0.94);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid rgba(56, 189, 248, 0.55);
+      border-radius: 26px;
+      padding: 16px 22px;
+      min-width: 380px;
+      max-width: 90vw;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(56, 189, 248, 0.35), inset 0 0 20px rgba(168, 85, 247, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      animation: hudGlowPulse 2.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes hudGlowPulse {
+      0% { box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 30px rgba(56,189,248,0.3), inset 0 0 15px rgba(168,85,247,0.2); }
+      100% { box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 50px rgba(56,189,248,0.6), inset 0 0 25px rgba(168,85,247,0.4); }
+    }
+
+    .voice-hud-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .voice-hud-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-orb-wrapper {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hud-orb-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #38bdf8, #a855f7, #ec4899, #38bdf8);
+      animation: spinOrb 2s linear infinite;
+      filter: blur(2px);
+    }
+
+    .hud-orb-core {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      background: #090d16;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      z-index: 2;
+      box-shadow: inset 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    @keyframes spinOrb {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hud-info-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hud-model-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hud-status-tag {
+      font-size: 0.78rem;
+      color: #38bdf8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hud-soundwaves {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 24px;
+    }
+
+    .hud-bar {
+      width: 4px;
+      height: 8px;
+      background: linear-gradient(180deg, #38bdf8, #a855f7);
+      border-radius: 3px;
+      animation: bixbyWave 0.7s ease-in-out infinite alternate;
+    }
+
+    .hud-bar:nth-child(1) { animation-delay: 0.1s; height: 10px; }
+    .hud-bar:nth-child(2) { animation-delay: 0.3s; height: 22px; }
+    .hud-bar:nth-child(3) { animation-delay: 0.15s; height: 16px; }
+    .hud-bar:nth-child(4) { animation-delay: 0.4s; height: 20px; }
+    .hud-bar:nth-child(5) { animation-delay: 0.25s; height: 12px; }
+
+    @keyframes bixbyWave {
+      0% { transform: scaleY(0.4); }
+      100% { transform: scaleY(1.3); }
+    }
+
+    .hud-transcript-bubble {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 10px 14px;
+      color: #f1f5f9;
+      font-size: 0.92rem;
+      font-weight: 500;
+      min-height: 22px;
+      line-height: 1.4;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    @keyframes hologramScan {
+      0% { top: 0%; opacity: 0.8; }
+      50% { top: 100%; opacity: 1; }
+      100% { top: 0%; opacity: 0.8; }
+    }
+
+    .mobile-app-header-strip, .mobile-view-tabs {
+      display: none;
+    }
+
+    /* 🖥️ Desktop PC Exclusive Rules (Pure Desktop Workspace, NO Mobile Elements!) */
+    @media screen and (min-width: 1025px) {
+      .mobile-app-header-strip, .mobile-view-tabs {
+        display: none !important;
+      }
+      .browser-window-bar {
+        display: flex !important;
+      }
+      .browser-nav-bar {
+        display: flex !important;
+      }
+      .browser-workspace {
+        display: flex !important;
+        flex-direction: row !important;
+        height: calc(100vh - 85px) !important;
+      }
+      .workspace-pane-left {
+        display: flex !important;
+        flex: 1 !important;
+        width: 50% !important;
+      }
+      .workspace-pane-right {
+        display: flex !important;
+        flex: 1 !important;
+        width: 50% !important;
+      }
+    }
+
+    /* 📱 Universal Mobile Responsiveness Rules (All Smartphones: SE, S24, S25, Ultra, Fold, iPhones) */
+    @media screen and (max-width: 1024px) {
+      html, body {
+        height: 100vh !important;
+        height: calc(var(--vh, 1vh) * 100) !important;
+        width: 100vw !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Hide bulky 4-row desktop header bars on Mobile */
+      .browser-window-bar, .browser-nav-bar {
+        display: none !important;
+      }
+
+      /* Show sleek single 42px Universal Mobile App Header */
+      .mobile-app-header-strip {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: #0e131f !important;
+        border-bottom: 1px solid #1e293b !important;
+        padding: 4px 10px !important;
+        height: 42px !important;
+        flex-shrink: 0 !important;
+        z-index: 100 !important;
+      }
+
+      .mobile-model-select {
+        font-size: clamp(0.7rem, 3.2vw, 0.8rem) !important;
+        max-width: clamp(100px, 35vw, 150px) !important;
+      }
+
+      /* Master Flex Workspace Area for Mobile */
+      .browser-workspace {
+        flex: 1 1 0% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+
+      /* Left Pane (100% width, Flex column, min-height: 0) */
+      .workspace-pane-left {
+        min-width: 0 !important;
+        width: 100% !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        border-right: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+      }
+
+      /* Right 3D Preview Pane HIDDEN BY DEFAULT on mobile */
+      .workspace-pane-right {
+        min-width: 0 !important;
+        width: 100% !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        border-left: none !important;
+        display: none !important;
+      }
+
+      .workspace-pane-right.mobile-active {
+        display: flex !important;
+      }
+
+      .workspace-pane-left.mobile-hidden {
+        display: none !important;
+      }
+
+      /* Chat Messages Scroll Container (Smooth Touch Drag & Safe Area Padding) */
+      .chat-stream-container {
+        padding: 10px 8px 36px 8px !important;
+        gap: 10px !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-y !important;
+        overscroll-behavior-y: contain !important;
+        scroll-behavior: smooth !important;
+      }
+
+      .message-bubble {
+        max-width: 96% !important;
+        font-size: clamp(0.82rem, 3.8vw, 0.92rem) !important;
+        padding: 9px 11px !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.5 !important;
+      }
+
+      pre, code {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+        font-size: clamp(0.76rem, 3.4vw, 0.83rem) !important;
+      }
+
+      /* Input Box STICKS TO BOTTOM WITH SAFE-AREA INSET FOR ANDROID/IOS BARS */
+      .chat-input-wrapper {
+        flex-shrink: 0 !important;
+        position: relative !important;
+        bottom: 0 !important;
+        z-index: 100 !important;
+        padding: 5px 8px !important;
+        background: #0e131f !important;
+        border-top: 1.5px solid #1e293b !important;
+      }
+
+      .chat-input-toolbar {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 5px !important;
+        padding-bottom: 4px !important;
+        scrollbar-width: none !important;
+      }
+      .chat-input-toolbar::-webkit-scrollbar { display: none !important; }
+
+      .chat-input-toolbar button {
+        padding: 4px 7px !important;
+        font-size: clamp(0.7rem, 3.2vw, 0.78rem) !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        border-radius: 6px !important;
+      }
+
+      .chat-textarea {
+        font-size: clamp(0.82rem, 3.8vw, 0.9rem) !important;
+        padding: 7px 9px !important;
+        min-height: 38px !important;
+        max-height: 85px !important;
+      }
+
+      /* Bottom Mobile Tab Navigation Bar with Safe Area Protection */
+      .mobile-view-tabs {
+        display: flex !important;
+        flex-shrink: 0 !important;
+        height: 42px !important;
+        background: #090d16 !important;
+        border-top: 1px solid #1e293b !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+      }
+
+      .voice-hud-card {
+        min-width: 270px !important;
+        max-width: 92vw !important;
+        padding: 12px 14px !important;
+      }
+
+      .acc-modal-dialog {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        padding: 14px 10px !important;
+        margin: 0 auto !important;
+        border-radius: 16px !important;
+        max-height: 88dvh !important;
+      }
+    }
+
+      .voice-hud-card {
+        min-width: 280px !important;
+        max-width: 92vw !important;
+        padding: 12px 14px !important;
+      }
+
+      .hud-model-name {
+        font-size: 0.92rem !important;
+      }
+
+      .hud-transcript-bubble {
+        font-size: 0.84rem !important;
+        padding: 8px 10px !important;
+      }
+
+      .acc-modal-dialog {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        padding: 16px 12px !important;
+        margin: 0 auto !important;
+        border-radius: 16px !important;
+        max-height: 88dvh !important;
+      }
+    }
+  </style>
+<body>
+
+  <!-- 🔮 Bixby/Siri Style Center Screen Futuristic AI Voice Assistant HUD -->
+  <div id="voice-assistant-overlay-hud" class="voice-hud-overlay">
+    <div class="voice-hud-card" id="hud-card-element">
+      <div class="voice-hud-top">
+        <div class="voice-hud-left">
+          <div class="hud-orb-wrapper">
+            <div class="hud-orb-ring" id="hud-orb-ring"></div>
+            <div class="hud-orb-core" id="hud-model-icon">🤖</div>
+          </div>
+          <div class="hud-info-col">
+            <span class="hud-model-name" id="hud-model-title">Claude Sonnet 5</span>
+            <span class="hud-status-tag" id="hud-status-badge">
+              <span class="status-dot pulse" style="background:#38bdf8;box-shadow:0 0 8px #38bdf8;"></span>
+              <span id="hud-status-text">✨ 호출 감지! 대기 중...</span>
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="hud-soundwaves">
+            <span class="hud-bar"></span>
+            <span class="hud-bar"></span>
+            <span class="hud-bar"></span>
+            <span class="hud-bar"></span>
+            <span class="hud-bar"></span>
+          </div>
+          <button onclick="hideVoiceAssistantHud()" style="background:transparent;border:none;color:#94a3b8;font-size:1.3rem;cursor:pointer;padding:4px;line-height:1;" title="닫기 (ESC)">&times;</button>
+        </div>
+      </div>
+
+      <div class="hud-transcript-bubble" id="hud-speech-transcript">
+        "말씀하세요... 음성을 듣고 있습니다."
+      </div>
+
+      <!-- ⏳ Visible Auto-Close Countdown Timer Progress Bar -->
+      <div id="hud-timer-container" style="display:flex;flex-direction:column;gap:4px;margin-top:2px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.76rem;">
+          <span style="color:#94a3b8;display:flex;align-items:center;gap:4px;">
+            <span>⏳</span>
+            <span id="hud-timer-label">명령 대기 중...</span>
+          </span>
+          <span id="hud-countdown-num" style="color:#38bdf8;font-weight:800;font-family:monospace;">5.0s</span>
+        </div>
+        <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+          <div id="hud-timer-bar" style="width:100%;height:100%;background:linear-gradient(90deg, #38bdf8, #a855f7);border-radius:3px;transition:width 0.1s linear;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔒 Security Lock Screen Overlay (PIN: 102030) -->
+  <div id="security-lockscreen-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#090d16;z-index:9999;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(circle at 50% 30%, rgba(139,92,246,0.18) 0%, transparent 60%);">
+    <div style="background:#121824;border:1.5px solid rgba(139,92,246,0.4);border-radius:20px;padding:36px 32px;width:420px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,0.9);text-align:center;color:#ffffff;" id="lockscreen-box">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg, #7c3aed, #06b6d4);border-radius:16px;margin:0 auto 16px auto;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(124,58,237,0.4);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <h2 style="font-size:1.4rem;font-weight:800;color:#ffffff;margin-bottom:6px;">Mikoran Desktop App</h2>
+      <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:24px;">보안 데스크톱 워크스페이스 로그인</p>
+
+      <div style="margin-bottom:16px;text-align:left;">
+        <label style="display:block;font-size:0.82rem;color:#cbd5e1;font-weight:700;margin-bottom:6px;">비밀번호 (PIN)</label>
+        <div style="display:flex;position:relative;">
+          <input type="password" id="lockscreen-pin-input" placeholder="비밀번호 입력..." style="width:100%;background:#0b0f19;border:1.5px solid #334155;border-radius:10px;padding:12px 16px;color:#ffffff;font-size:1.1rem;letter-spacing:0.2em;font-family:monospace;outline:none;" onkeydown="handleLoginPinKeyDown(event)">
+        </div>
+        <span id="lockscreen-error-msg" style="display:none;color:#ef4444;font-size:0.8rem;margin-top:6px;font-weight:600;">⚠️ 비밀번호가 일치하지 않습니다.</span>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:1rem;font-weight:700;border-radius:10px;background:linear-gradient(135deg, #7c3aed, #6366f1);border:1px solid #a78bfa;box-shadow:0 6px 20px rgba(124,58,237,0.4);cursor:pointer;" onclick="submitLockscreenPin()">
+        <span>🚀 로그인 &amp; 잠금해제</span>
+      </button>
+
+      <div style="margin-top:18px;font-size:0.75rem;color:#64748b;">
+        🔒 엔드투엔드 암호화 보안 데스크톱 세션
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 Exclusive Mobile Native App Header Strip (Displays ONLY on Mobile Devices) -->
+  <div class="mobile-app-header-strip">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,#38bdf8,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <span style="font-weight:800;font-size:0.95rem;color:#ffffff;letter-spacing:-0.3px;">Mikoran AI</span>
+    </div>
+
+    <!-- Mobile Compact Model Selector (Complete 14 AI Models) -->
+    <select class="mobile-model-select" id="mobile-model-select" onchange="changeModelMode(this.value)" style="background:#1e293b;color:#ffffff;border:1px solid #334155;border-radius:8px;padding:4px 6px;font-size:0.75rem;outline:none;max-width:145px;">
+      <optgroup label="🌟 최신 플래그십 & 하이브리드">
+        <option value="claude-sonnet-5">🤖 Claude 3.7 Sonnet</option>
+        <option value="antigravity-hybrid">🔮 Antigravity Hybrid</option>
+        <option value="blender-3d-studio">🎨 Blender 3D Studio</option>
+      </optgroup>
+      <optgroup label="🌐 차세대 AI 모델 풀">
+        <option value="sonar-2">🌐 Sonar 2 (웹 검색)</option>
+        <option value="gpt-5-6-terra">⚡ GPT 5.6 Terra</option>
+        <option value="gpt-5-6-sol-max">☀️ GPT 5.6 Sol Max</option>
+        <option value="gemini-3-7-flash">✨ Gemini 3.7 Flash</option>
+        <option value="claude-opus-5">🧠 Claude Opus 5</option>
+        <option value="kimi-k3-us">🌙 Kimi K3</option>
+        <option value="glm-5-3-us">💫 GLM 5.3</option>
+        <option value="grok-4-6">🚀 Grok 4.6</option>
+        <option value="nemotron-3-ultra">⚡ Nemotron 3 Ultra</option>
+      </optgroup>
+      <optgroup label="🖥️ 로컬 PC 오프라인 AI">
+        <option value="qwen2.5-coder:1.5b">🖥️ Qwen 2.5 Coder</option>
+        <option value="deepseek-r1">🔮 DeepSeek R1 Local</option>
+      </optgroup>
+    </select>
+
+    <div style="display:flex;align-items:center;gap:5px;">
+      <button class="btn btn-secondary btn-sm" onclick="openSessionHistoryModal()" style="background:#1e293b;border-color:#38bdf8;color:#38bdf8;padding:4px 8px;font-size:0.75rem;" title="이전 대화 목록">
+        <span>📜 히스토리</span>
+      </button>
+      <button class="btn btn-orange btn-sm" onclick="openAccountModal()" style="padding:4px 8px;font-size:0.75rem;" title="계정 관리">
+        <span>🔑 계정</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Top Window Bar & Browser Tabs -->
+  <div class="browser-window-bar">
+    <div class="brand" style="border:none;padding:0;gap:8px;">
+      <div class="brand-logo" style="width:28px;height:28px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <span class="brand-title" style="font-size:1.05rem;color:#ffffff;">Mikoran AI Browser</span>
+    </div>
+
+    <!-- Browser Tabs Container -->
+    <div class="browser-tabs" id="tabs-container">
+      <div class="browser-tab active" data-tab-id="tab_1" onclick="switchBrowserTab('tab_1')">
+        <span class="status-dot pulse"></span>
+        <span class="tab-title">⚡ Claude + Antigravity</span>
+        <span class="tab-close" onclick="closeBrowserTab(event, 'tab_1')">&times;</span>
+      </div>
+      <button class="btn-new-tab" onclick="createBrowserTab()" title="새 AI 브라우저 탭 추가">+</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:6px;">
+      <!-- ✨ Update Notification Pill -->
+      <button class="btn btn-sm" id="btn-update-banner" onclick="openUpdateModal()" style="background:linear-gradient(135deg, #10b981, #06b6d4);border:1px solid #34d399;color:#ffffff;font-weight:800;display:inline-flex;align-items:center;gap:5px;box-shadow:0 0 12px rgba(16,185,129,0.4);" title="새로운 v2.6.0 버전이 준비되었습니다. 클릭하여 1-클릭 업그레이드">
+        <span class="status-dot pulse" style="background:#ffffff;"></span>
+        <span>✨ v2.6 업데이트 [다운로드]</span>
+      </button>
+
+      <div class="quota-drawer" onclick="openAccountModal()" title="계정 관리 및 토큰 할당량 모니터 열기">
+        <span class="badge-emerald" id="quota-multiplier-badge" style="color:#34d399;">⚡ 토큰: 무제한</span>
+        <span style="font-size:0.8rem;color:#ea580c;font-weight:800;">🔑 충전: +100%/5h</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openChangelogModal()" style="background:#1e293b;border-color:#7c3aed;color:#c4b5fd;" title="전체 업데이트 내역 및 릴리즈 패치노트 확인">
+        <span>📢 패치노트</span>
+      </button>
+      <a href="/admin" class="btn btn-secondary btn-sm">대시보드 🔑</a>
+    </div>
+  </div>
+
+  <!-- Address Bar & Toolbar Strip -->
+  <div class="browser-nav-bar">
+    <button class="btn btn-secondary btn-nav-action" onclick="reloadActiveTab()" title="새로고침">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+    </button>
+    
+    <!-- Project File Explorer Button (Triggers Native Directory Picker & Opens VS Code Style Explorer Panel) -->
+    <button class="btn btn-primary btn-nav-action" onclick="openSystemFileOrFolderPicker()" style="background:linear-gradient(135deg, #0284c7, #0369a1);border-color:#38bdf8;font-weight:700;" title="내 PC 프로젝트 폴더 연결 및 실시간 파일 탐색기(Explorer) 열기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <span>📁 프로젝트 파일 탐색기</span>
+    </button>
+    
+    <!-- Smart URL / Prompt Bar -->
+    <div class="address-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="browser-address-input" value="https://mikoran.ai/session/hybrid-workspace-1" placeholder="명령어 또는 AI 프로그래밍 요구사항을 입력하세요...">
+      <div class="address-bar-badge" id="current-model-tag">Claude 3.7 Sonnet</div>
+    </div>
+
+    <!-- Quick Action Controls -->
+    <select id="model-mode-selector" onchange="changeModelMode(this.value)" class="btn btn-secondary btn-nav-action" style="background:#1e293b;color:#ffffff;border:1px solid #334155;">
+      <optgroup label="🌟 최신 플래그십 & 하이브리드">
+        <option value="antigravity-hybrid">🔮 Antigravity Supreme Hybrid (Claude + Gemini 2.0)</option>
+        <option value="blender-3d-studio">🎨 Blender 3D & WebGL 스튜디오</option>
+      </optgroup>
+      <optgroup label="🌐 Perplexity & 차세대 AI 모델 풀">
+        <option value="sonar-2">🌐 Sonar 2 (실시간 웹 지능 검색)</option>
+        <option value="gpt-5-6-terra">⚡ GPT 5.6 Terra (고속 차세대 엔진)</option>
+        <option value="gpt-5-6-sol-max">☀️ GPT-5.6 Sol (Max 추론 플래그십)</option>
+        <option value="gemini-3-7-flash">✨ Gemini 3.7 Flash (초고속 멀티모달)</option>
+        <option value="claude-sonnet-5">🤖 Claude Sonnet 5 (High Speed & Code)</option>
+        <option value="claude-opus-5">🧠 Claude Opus 5 (Max 심층 사고)</option>
+        <option value="kimi-k3-us">🌙 Kimi K3 (US-based 대용량 컨텍스트)</option>
+        <option value="glm-5-3-us">💫 GLM 5.3 (US-based 이중언어 지능)</option>
+        <option value="grok-4-6">🚀 Grok 4.6 (실시간 xAI 지능)</option>
+        <option value="nemotron-3-ultra">⚡ Nemotron 3 Ultra (NVIDIA AI 엔진)</option>
+      </optgroup>
+      <optgroup label="🖥️ 로컬 PC 오프라인 AI">
+        <option value="qwen2.5-coder:1.5b">🖥️ Qwen 2.5 Coder (100% Local AI)</option>
+        <option value="deepseek-r1">🔮 DeepSeek R1 Local AI</option>
+      </optgroup>
+    </select>
+
+
+
+    <!-- 🔓 Jailbreak / Godmode ON/OFF Toggle Switch Button -->
+    <button class="btn jailbreak-toggle-btn active" id="jailbreak-toggle-btn" onclick="toggleJailbreakMode()" title="클릭하여 무제한 탈옥 모드(Zero Refusal / Full Automation) 켜기/끄기">
+      <span class="jailbreak-icon" id="jailbreak-icon">🔓</span>
+      <span class="jailbreak-label" id="jailbreak-status-text">탈옥: ON</span>
+      <span class="jailbreak-indicator"></span>
+    </button>
+
+    <button class="btn btn-orange btn-nav-action" onclick="openAccountModal()">
+      <span>계정 전환 🔑</span>
+    </button>
+
+    <button class="btn btn-secondary btn-nav-action" onclick="toggleSplitPane()" id="btn-toggle-split">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      <span>스플릿 뷰</span>
+    </button>
+
+    <button class="btn btn-secondary btn-nav-action" onclick="openSessionHistoryModal()" style="background:#0f172a;border-color:#38bdf8;color:#38bdf8;" title="저장된 이전 대화 및 작업 히스토리 목록 불러오기">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>이전 대화 📜</span>
+    </button>
+
+    <button class="btn btn-primary btn-nav-action" onclick="saveCurrentSessionSnapshot()">
+      <span>세션 보존 💾</span>
+    </button>
+
+    <button class="btn btn-secondary btn-nav-action" onclick="lockWorkspace()" style="background:#1e293b;border-color:#475569;" title="워크스페이스 잠금 (PIN 재입력 필요)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <span>잠금 🔒</span>
+    </button>
+  </div>
+
+  <!-- Main Workspace Body -->
+  <div class="browser-workspace">
+    <!-- Left Pane: AI Chat & Prompt Engine -->
+    <div class="workspace-pane-left" id="pane-left">
+      <div class="chat-stream-container" id="chat-stream-messages">
+        <div class="message-bubble assistant">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-weight:700;color:#a78bfa;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Mikoran Personal AI Browser & 3D Blender Studio Ready</span>
+          </div>
+          안녕하세요! **Claude + Antigravity 하이브리드 AI 브라우저 & 3D 블렌더 스튜디오**입니다.<br>
+          - **🎨 3D 블렌더 애니메이션 제너레이터**: Blender Python 스크립트(`bpy`) 및 3D WebGL 애니메이션을 실시간 자동 생성합니다.<br>
+          - **💾 로컬 파일 직접 수정/생성**: AI가 생성하거나 수정한 파일/스크립트를 내 PC(`Desktop\신세계`)로 1-클릭 저장 및 수정합니다.<br>
+          - **📎 파일 첨부 & 엔터 전송**: 파일 드래그&드롭, 파일 첨부, 엔터키 빠른 전송을 지원합니다.<br>
+          요구하시는 3D 애니메이션이나 파일 수정 요청을 입력해 보세요!
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
+            <button class="btn btn-secondary btn-sm" onclick="sendQuickPrompt('Three.js로 회전하는 화려한 3D 네온 은하수 파티클 애니메이션 웹 코드를 작성해줘')" style="font-size:0.75rem;background:#172554;border-color:#3b82f6;color:#93c5fd;">🎨 3D 은하수 애니메이션</button>
+            <button class="btn btn-secondary btn-sm" onclick="sendQuickPrompt('HTML5 Canvas로 구현한 3D 핑퐁 패들 게임 반응형 코드를 짜줘')" style="font-size:0.75rem;background:#042f2e;border-color:#14b8a6;color:#5eead4;">🎮 3D 핑퐁 게임</button>
+            <button class="btn btn-secondary btn-sm" onclick="sendQuickPrompt('Blender 3D 파이썬 bpy 스크립트로 3D 캐릭터가 걸어가는 회전 키프레임 애니메이션 코드를 작성해줘')" style="font-size:0.75rem;background:#31103f;border-color:#a855f7;color:#d8b4fe;">🐍 Blender 3D 모션 (.py)</button>
+            <button class="btn btn-secondary btn-sm" onclick="sendQuickPrompt('Python BeautifulSoup 및 Playwright로 웹 데이터를 자동 스크래핑하는 정교한 파이썬 코드를 만들어줘')" style="font-size:0.75rem;background:#1e293b;border-color:#38bdf8;color:#38bdf8;">⚡ 웹 자동화 스크래퍼</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-wrapper" id="chat-input-container">
+        <div class="chat-input-toolbar">
+          <span style="font-size:0.75rem;color:#cbd5e1;white-space:nowrap;flex-shrink:0;" id="stream-status-text">대기 중...</span>
+          <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+            <!-- Hidden File & Folder Inputs for Native PC & Smartphone Storage Explorer -->
+            <input type="file" id="file-upload-input" multiple accept="*/*" style="display:none;" onchange="handleFileSelected(event)">
+            <input type="file" id="system-folder-input" webkitdirectory directory multiple style="display:none;" onchange="handleFolderSelected(event)">
+            <input type="file" id="smartphone-file-input" multiple accept="*/*" style="display:none;" onchange="handleSmartphoneFileSelected(event)">
+            
+            <button class="btn btn-primary btn-sm" onclick="openSystemFileOrFolderPicker()" style="background:linear-gradient(135deg, #0284c7, #0369a1);border-color:#38bdf8;font-weight:700;" title="프로젝트 폴더 연결 및 실시간 파일 탐색기 열기">
+              <span>📁 PC 폴더 연동</span>
+            </button>
+
+            <button class="btn btn-primary btn-sm" onclick="triggerSmartphoneFilePicker()" style="background:linear-gradient(135deg, #10b981, #059669);border-color:#34d399;font-weight:700;" title="스마트폰 내장 메모리 파일 선택 및 AI 자율 수정">
+              <span>📱 폰 파일 선택/자율수정</span>
+            </button>
+
+            <button class="btn btn-primary btn-sm" onclick="openRemoteTransferModal()" style="background:linear-gradient(135deg, #7c3aed, #06b6d4);border-color:#a78bfa;font-weight:700;" title="스마트폰에서 사진이나 글을 컴퓨터 미코란으로 즉시 쏘기">
+              <span>📲 PC로 사진/글 전송</span>
+            </button>
+
+            <button class="btn btn-secondary btn-sm" id="btn-wakeword-toggle" onclick="toggleWakeWordMode()" style="background:#042f2e;border-color:#14b8a6;color:#5eead4;">
+              <span id="wakeword-btn-label">✨ '하이 AI' 상시호출</span>
+            </button>
+
+            <button class="btn btn-secondary btn-sm" id="btn-voice-stt" onclick="toggleVoiceRecognition()" style="background:#1e293b;border-color:#38bdf8;color:#38bdf8;">
+              <span id="stt-btn-label">🎙️ 음성 인식</span>
+            </button>
+
+            <button class="btn btn-secondary btn-sm" id="btn-tts-toggle" onclick="toggleTtsAutoPlay()" style="background:#1e293b;border-color:#a855f7;color:#d8b4fe;">
+              <span id="tts-btn-label">🔊 자비스 보이스</span>
+            </button>
+
+            <button class="btn jailbreak-toggle-btn active" id="jailbreak-toggle-btn" onclick="toggleJailbreakMode()" style="padding:4px 8px;font-size:0.75rem;">
+              <span id="jailbreak-status-text">🔓 탈옥: ON</span>
+            </button>
+
+            <button class="btn btn-secondary btn-sm" onclick="openSessionHistoryModal()" style="background:#0f172a;border-color:#38bdf8;color:#38bdf8;">
+              <span>📜 이전 대화</span>
+            </button>
+
+            <button class="btn btn-orange btn-sm" onclick="openAccountModal()">
+              <span>🔑 계정 전환</span>
+            </button>
+
+            <button class="btn btn-secondary btn-sm" onclick="clearCurrentChat()">🗑️ 내용 비우기</button>
+            <button class="btn btn-primary btn-sm" onclick="sendBrowserMessage()" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:#a78bfa;font-weight:700;">전송 🚀</button>
+          </div>
+        </div>
+
+        <!-- Voice Input Live Listening Indicator -->
+        <div id="stt-listening-banner" style="display:flex;background:rgba(20,184,166,0.15);border:1px solid #14b8a6;border-radius:8px;padding:8px 14px;margin-bottom:8px;font-size:0.84rem;color:#5eead4;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="status-dot pulse" style="background:#14b8a6;box-shadow:0 0 10px #14b8a6;"></span>
+            <span id="stt-banner-text">🎙️ <strong>상시 호출어 대기 중</strong>: "하이 클로드", "하이 지피티", "하이 제미나이", "하이 소나" 등으로 자유롭게 말을 걸어보세요!</span>
+          </div>
+          <span style="font-size:0.75rem;background:#134e4a;padding:2px 8px;border-radius:12px;color:#a7f3d0;">핸즈프리 모드</span>
+        </div>
+
+        <textarea id="chat-input-textarea" class="chat-textarea" rows="3" placeholder="질문/코딩 프롬프트 입력 또는 말로 '하이 클로드 ~', '하이 지피티 ~'라고 불러보세요..." onkeydown="handleChatKeyDown(event)"></textarea>
+
+        <!-- Attachment Preview Pill Strip (Positioned BELOW the input box) -->
+        <div id="attachment-preview-strip" style="display:none;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid #1e293b;margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Live Sandbox Studio -->
+    <div class="workspace-pane-right" id="pane-right">
+      <div class="sandbox-tabs">
+        <div class="sandbox-tab active" data-sandbox-tab="preview" onclick="switchSandboxTab('preview')">🖥️ 3D / 라이브 샌드박스 프리뷰</div>
+        <div class="sandbox-tab" data-sandbox-tab="terminal" onclick="switchSandboxTab('terminal')">⚡ 시스템 터미널 제어기</div>
+        <div class="sandbox-tab" data-sandbox-tab="explorer" onclick="switchSandboxTab('explorer')" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#ffffff;border:1px solid #38bdf8;font-weight:700;">📁 프로젝트 파일 탐색기 (Explorer)</div>
+        <div class="sandbox-tab" data-sandbox-tab="comparison" onclick="switchSandboxTab('comparison')">🔀 하이브리드 비교분석</div>
+        <div class="sandbox-tab" data-sandbox-tab="accounts" onclick="switchSandboxTab('accounts')">🔑 계정 풀 & 할당량 모니터</div>
+        <div class="sandbox-tab" data-sandbox-tab="hologram" onclick="switchSandboxTab('hologram')" style="background:linear-gradient(135deg,#0369a1,#7c3aed);color:#ffffff;border:1px solid #38bdf8;font-weight:700;">✨ 3D 홀로그램 라이브 시뮬레이터</div>
+      </div>
+
+      <div class="sandbox-content" id="sandbox-content-area">
+        <!-- Workspace File Explorer Subtab (Antigravity IDE / VS Code Style Sidebar & Live Code Inspector) -->
+        <div id="subtab-explorer" style="display:none;height:100%;flex-direction:column;background:#090d16;color:#e2e8f0;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+          <!-- Top Action Bar -->
+          <div style="background:#0f172a;padding:10px 14px;border-bottom:1px solid #334155;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:0.9rem;font-weight:bold;color:#38bdf8;" id="explorer-folder-name">📁 프로젝트 폴더: 연결되지 않음</span>
+              <span style="font-size:0.75rem;color:#94a3b8;" id="explorer-file-count">(총 0개 파일)</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" onclick="openRemotePcFolderModal()" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:#a78bfa;font-weight:700;">📱 PC 폴더 선택 / 경로 변경</button>
+              <button class="btn btn-secondary btn-sm" onclick="openSystemFileOrFolderPicker()" style="background:#1e293b;border-color:#38bdf8;color:#38bdf8;">📂 PC 파일 탐색기 열기</button>
+              <button class="btn btn-secondary btn-sm" onclick="refreshWorkspaceExplorer()" style="background:#1e293b;border-color:#38bdf8;color:#38bdf8;">🔄 새로고침</button>
+            </div>
+          </div>
+
+          <!-- Split Workspace Panel: Left File Tree (Sidebar) & Right Live Code Editor -->
+          <div style="display:flex;flex:1;overflow:hidden;">
+            <!-- Left File Tree Sidebar Panel -->
+            <div style="width:260px;background:#0d1322;border-right:1px solid #1e293b;display:flex;flex-direction:column;padding:10px;">
+              <div style="font-size:0.78rem;font-weight:700;color:#94a3b8;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                <span>FILE EXPLORER</span>
+                <span style="color:#5eead4;font-size:0.7rem;">실시간 감시 중</span>
+              </div>
+              <input type="text" id="explorer-file-filter" placeholder="🔍 파일 검색..." onkeyup="filterExplorerFiles(this.value)" style="width:100%;background:#090d16;border:1px solid #1e293b;border-radius:6px;padding:4px 8px;font-size:0.78rem;color:#fff;margin-bottom:10px;box-sizing:border-box;">
+              
+              <!-- File Tree List Container -->
+              <div id="explorer-file-tree-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+                <div style="color:#64748b;font-size:0.8rem;text-align:center;padding:20px 0;">📂 [오픈 폴더] 버튼을 클릭하여 내 PC 프로젝트 폴더를 연결하세요.</div>
+              </div>
+            </div>
+
+            <!-- Right Live Code Inspector / Editor Panel -->
+            <div style="flex:1;display:flex;flex-direction:column;background:#080c14;">
+              <div style="background:#0f172a;padding:8px 14px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;">
+                <span id="explorer-selected-filename" style="font-size:0.85rem;font-weight:bold;color:#5eead4;font-family:monospace;">📄 선택된 파일 없음</span>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-primary btn-sm" onclick="saveSelectedExplorerFile()" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#34d399;font-weight:700;">💾 이 파일 내 PC로 직접 수정/저장</button>
+                  <button class="btn btn-secondary btn-sm" onclick="promptAiToEditSelectedFile()" style="background:#1e293b;border-color:#7c3aed;color:#c4b5fd;">🤖 AI에게 이 파일 수정 요청</button>
+                </div>
+              </div>
+              
+              <textarea id="explorer-code-editor" style="flex:1;background:#050811;color:#38bdf8;border:none;padding:14px;font-family:'Fira Code',monospace;font-size:0.88rem;resize:none;outline:none;line-height:1.5;" placeholder="좌측 파일 탐색기에서 파일을 클릭하면 소스 코드가 표시되고 실시간 편집할 수 있습니다..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div id="subtab-preview" style="height:100%;display:flex;flex-direction:column;">
+          <!-- Save File & Blender Script Action Bar -->
+          <div style="background:#0e131f;padding:8px 12px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span style="font-size:0.8rem;color:#cbd5e1;font-weight:600;" id="preview-filename-badge">📄 렌더링 프리뷰 (실시간 WebGL 3D 엔진 수신 중)</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="saveCurrentPreviewToFile()" title="AI 생성 코드를 내 컴퓨터 파일로 직접 수정/저장">
+                <span>💾 파일로 저장/수정</span>
+              </button>
+              <button class="btn btn-orange btn-sm" onclick="exportBlenderScript()" title="Blender 3D 애니메이션 Python 스크립트(.py) 다운로드">
+                <span>🎨 Blender 스크립트(.py) 생성</span>
+              </button>
+            </div>
+          </div>
+          <iframe id="sandbox-preview-frame" style="flex:1;border:none;" srcdoc="<html style='background:#111;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100%;'><body><div style='text-align:center;'><h2>🎨 3D WebGL & Blender 애니메이션 프리뷰</h2><p>AI가 생성한 3D 모델 및 애니메이션 코드가 여기에 실시간 렌더링됩니다.</p></div></body></html>"></iframe>
+        </div>
+
+        <!-- Terminal Subtab (Full Agent System Authority) -->
+        <div id="subtab-terminal" style="display:none;height:100%;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="color:#ffffff;margin:0;">⚡ 시스템 터미널 제어기 (Full Agent Privileges)</h3>
+            <span class="badge-emerald">100% Root Exec Enabled</span>
+          </div>
+          <p class="text-muted" style="font-size:0.85rem;margin:0;">Antigravity agent와 동일하게 내 PC의 명령어(PowerShell/Cmd) 실행, 앱 설치, 스크립트 구동 권한을 100% 보유합니다.</p>
+          
+          <div style="flex:1;background:#090d16;border:1px solid #334155;border-radius:12px;padding:14px;font-family:'Fira Code',monospace;font-size:0.88rem;overflow-y:auto;color:#38bdf8;" id="terminal-output-console">
+            <div>Mikoran Agent Terminal Authority Ready [C:\Users\chlxo\Desktop\신세계]</div>
+            <div style="color:#cbd5e1;margin-top:6px;">명령어를 입력하거나 AI에게 'Ollama 실행해줘', 'Blender 실행해줘'처럼 자연어로 지시하세요!</div>
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="terminal-cmd-input" placeholder="실행할 터미널 명령어를 입력하세요 (예: dir, pythonScript.py, blender)..." style="flex:1;background:#0b0f19;border:1px solid #334155;border-radius:8px;padding:10px 14px;color:#fff;font-family:'Fira Code',monospace;" onkeydown="handleTerminalKeyDown(event)">
+            <button class="btn btn-primary btn-sm" onclick="runTerminalCommandUI()">실행 ⚡</button>
+          </div>
+        </div>
+
+        <div id="subtab-comparison" style="display:none;">
+          <h3 style="color:#ffffff;">🔀 Claude vs Antigravity Gemini 듀얼 비교</h3>
+          <p class="text-muted">동일한 프롬프트에 대해 두 AI 모델의 응답 속도와 코드 정확도를 실시간으로 비교합니다.</p>
+          <div class="stats-grid mt-4">
+            <div class="stat-card">
+              <h4 style="color:#ffffff;">Claude 3.7 Sonnet</h4>
+              <p class="text-muted" style="font-size:0.85rem;">추론 및 에이전트 코딩 특화</p>
+              <span class="badge-purple">Active</span>
+            </div>
+            <div class="stat-card">
+              <h4 style="color:#ffffff;">Antigravity Gemini</h4>
+              <p class="text-muted" style="font-size:0.85rem;">대용량 컨텍스트 & 빠른 응답</p>
+              <span class="badge-emerald">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="subtab-accounts" style="display:none;">
+          <h3 style="color:#ffffff;">🔑 무제한 계정 풀 (Auto-Switch Engine)</h3>
+          <p class="text-muted">할당량이 초과되면 자동으로 다음 계정으로 갈아타며 대화 맥락을 보존합니다.</p>
+          <button class="btn btn-primary btn-sm mt-2 mb-3" onclick="openAccountModal()">계정 관리 창 열기 🔑</button>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>계정명</th>
+                  <th>상태</th>
+                  <th>5시간 할당량</th>
+                  <th>주간 할당량</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-table-body">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Hologram Live Simulator Subtab -->
+        <div id="subtab-hologram" style="display:none;height:100%;flex-direction:column;gap:10px;background:radial-gradient(circle at 50% 30%, rgba(14,165,233,0.14) 0%, rgba(9,13,22,0.95) 85%);padding:12px;border-radius:14px;border:1px solid rgba(56,189,248,0.4);box-shadow:0 0 35px rgba(56,189,248,0.25);">
+          <!-- Hologram HUD Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(56,189,248,0.3);">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="status-dot pulse" style="background:#38bdf8;box-shadow:0 0 14px #38bdf8;"></span>
+              <span style="font-weight:800;color:#38bdf8;font-size:0.9rem;letter-spacing:1px;font-family:monospace;">✨ MIKORAN 3D HOLOGRAPHIC SIMULATION LAB</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="toggleHologramDeviceFrame('phone')" style="background:#0f172a;border-color:#38bdf8;color:#38bdf8;font-size:0.75rem;">📱 폰 프레임</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleHologramDeviceFrame('tablet')" style="background:#0f172a;border-color:#a855f7;color:#d8b4fe;font-size:0.75rem;">💻 태블릿</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleHologramDeviceFrame('full')" style="background:#0f172a;border-color:#10b981;color:#6ee7b7;font-size:0.75rem;">🖥️ 전체화면</button>
+              <button class="btn btn-primary btn-sm" onclick="toggleHologramFullscreen()" style="background:linear-gradient(135deg,#0284c7,#7c3aed);font-size:0.75rem;font-weight:700;">🚀 홀로그램 HUD 확장</button>
+            </div>
+          </div>
+
+          <!-- Hologram Canvas & Frame Container -->
+          <div id="hologram-viewport-container" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:rgba(11,15,25,0.9);border-radius:12px;border:1.5px solid rgba(56,189,248,0.4);overflow:hidden;box-shadow:inset 0 0 40px rgba(56,189,248,0.25);">
+            <!-- Holographic Scanning Grid Animation Line -->
+            <div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,transparent,#38bdf8,#a855f7,transparent);animation:hologramScan 3.5s linear infinite;z-index:10;pointer-events:none;"></div>
+            
+            <iframe id="hologram-simulator-frame" style="width:100%;height:100%;border:none;border-radius:10px;transition:all 0.3s ease;" src="/hologram-simulator.html"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exact High-Fidelity Account Management Modal (Matching User Screenshot) -->
+  <div class="acc-modal-overlay" id="account-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog">
+      <div class="acc-modal-header">
+        <h2>계정 및 토큰 충전 모니터</h2>
+        <button class="btn-close-modal" onclick="closeAccountModal()">닫기</button>
+      </div>
+
+      <!-- Real-Time Token Quota & Refill Speed Info Box -->
+      <div style="background:#241f1c;border:1px solid #e07038;border-radius:12px;padding:14px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-weight:700;color:#ffffff;font-size:0.9rem;">📊 토큰 총 가용량 & 충전 속도</span>
+          <span class="badge-emerald" style="font-size:0.75rem;">무제한 (Pro Account Pool)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.82rem;color:#cbd5e1;">
+          <div>• **사용 가능 토큰**: <span style="color:#34d399;font-weight:700;">무제한 (Unlimited)</span></div>
+          <div>• **자동 충전 주기**: <span style="color:#f97316;font-weight:700;">5시간 마다 +100% 충전</span></div>
+          <div>• **시간당 충전 속도**: <span style="color:#38bdf8;font-weight:700;">시간당 +20% 자동 복구</span></div>
+          <div>• **다음 완충 리셋**: <span style="color:#fbbf24;font-weight:700;">2시간 45분 남음</span></div>
+        </div>
+      </div>
+
+      <!-- Account List Container -->
+      <div id="modal-account-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Add New Account Form Toggle -->
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #3d3734;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.85rem;color:#cbd5e1;">+ 새 Pro API 계정 추가</span>
+        <button class="btn-acc-action" style="background:#ea580c;color:#fff;border:none;" onclick="addNewAccountPrompt()">+ 계정 등록</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- 📲 Mobile to PC Instant Photo & Text Transfer Hub Modal Overlay -->
+  <div class="acc-modal-overlay" id="remote-transfer-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog" style="width:680px;max-width:96vw;display:flex;flex-direction:column;gap:14px;max-height:88vh;">
+      <div class="acc-modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.4rem;">📲</span>
+          <h2>스마트폰 ➔ 컴퓨터 사진 &amp; 글 즉시 전송함</h2>
+        </div>
+        <button class="btn-close-modal" onclick="closeRemoteTransferModal()">&times;</button>
+      </div>
+
+      <p style="font-size:0.85rem;color:#cbd5e1;margin:0;">스마트폰에서 캡처한 사진, 갤러리 이미지, 메모 글을 클릭 한 번으로 컴퓨터 미코란 대화창 및 화면에 즉시 전송합니다.</p>
+
+      <!-- Tab Selection inside Modal -->
+      <div style="display:flex;gap:8px;border-bottom:1px solid #1e293b;padding-bottom:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" id="tab-tr-photo-btn" onclick="switchTransferTab('photo')" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-color:#38bdf8;font-weight:700;">📸 사진/이미지 컴퓨터로 전송</button>
+        <button class="btn btn-secondary btn-sm" id="tab-tr-text-btn" onclick="switchTransferTab('text')" style="background:#1e293b;border-color:#38bdf8;color:#38bdf8;">📝 텍스트/메모 컴퓨터로 쏘기</button>
+        <button class="btn btn-secondary btn-sm" id="tab-tr-history-btn" onclick="switchTransferTab('history')" style="background:#1e293b;border-color:#a855f7;color:#d8b4fe;">📜 수신함 목록 보기</button>
+      </div>
+
+      <!-- Section 1: Photo Upload -->
+      <div id="tr-sec-photo" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="border:2px dashed #38bdf8;border-radius:10px;padding:24px;text-align:center;background:rgba(56,189,248,0.04);cursor:pointer;" onclick="document.getElementById('tr-photo-input').click()">
+          <span style="font-size:2.2rem;display:block;margin-bottom:6px;">📸</span>
+          <span style="font-size:0.95rem;font-weight:bold;color:#38bdf8;">스마트폰 갤러리/카메라 사진 선택</span>
+          <span style="display:block;font-size:0.78rem;color:#94a3b8;margin-top:4px;">(컴퓨터 C:\Users\Public\Downloads\신세계 로 자동 전송/저장됩니다)</span>
+          <input type="file" id="tr-photo-input" accept="image/*" style="display:none;" onchange="handleTransferPhotoSelected(event)">
+        </div>
+        <div id="tr-photo-preview-box" style="display:none;align-items:center;gap:12px;background:#0d1322;padding:10px;border-radius:8px;border:1px solid #334155;">
+          <img id="tr-photo-preview-img" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid #38bdf8;">
+          <div style="flex:1;">
+            <div id="tr-photo-filename" style="font-size:0.85rem;font-weight:bold;color:#fff;">photo.png</div>
+            <div id="tr-photo-filesize" style="font-size:0.75rem;color:#94a3b8;">0 KB</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="sendPhotoToPcAction()" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#34d399;font-weight:700;">🚀 컴퓨터로 쏘기</button>
+        </div>
+      </div>
+
+      <!-- Section 2: Text Beam -->
+      <div id="tr-sec-text" style="display:none;flex-direction:column;gap:10px;">
+        <textarea id="tr-text-input" rows="5" placeholder="컴퓨터 미코란 대화창으로 전송할 글, URL, 메모, 코드를 여기에 입력하세요..." style="width:100%;background:#090d16;border:1px solid #334155;border-radius:8px;padding:12px;color:#5eead4;font-family:sans-serif;font-size:0.9rem;resize:vertical;"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="sendTextToPcAction()" style="background:linear-gradient(135deg,#7c3aed,#06b6d4);border-color:#a78bfa;font-weight:700;padding:10px;">🚀 컴퓨터 대화창으로 텍스트 쏘기</button>
+      </div>
+
+      <!-- Section 3: Transfer History -->
+      <div id="tr-sec-history" style="display:none;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;">
+        <div id="tr-history-list-box" style="color:#94a3b8;font-size:0.85rem;text-align:center;padding:20px 0;">수신 내역 조회 중...</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #1e293b;">
+        <span style="font-size:0.78rem;color:#94a3b8;" id="tr-status-text">* 전송 시 컴퓨터 미코란 화면에 토스트 알림 및 대화 입력창에 즉시 입력됩니다.</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeRemoteTransferModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 Remote PC Folder Navigator Modal (Allows selecting any folder on PC from Smartphone or PC) -->
+  <div class="acc-modal-overlay" id="remote-pc-folder-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog" style="width:680px;max-width:96vw;display:flex;flex-direction:column;gap:14px;max-height:88vh;">
+      <div class="acc-modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.4rem;">📱</span>
+          <h2>원격 컴퓨터 폴더 선택기 (스마트폰 &amp; PC 연동)</h2>
+        </div>
+        <button class="btn-close-modal" onclick="closeRemotePcFolderModal()">&times;</button>
+      </div>
+
+      <p style="font-size:0.85rem;color:#cbd5e1;margin:0;">스마트폰 화면에서 컴퓨터의 원하는 폴더(C:\드라이브, 바탕화면, 다운로드 등)를 직접 탐색하고 선택하여 실시간으로 파일 생성/수정/AI 편집을 수행합니다.</p>
+
+      <!-- Path Bar & Quick Presets -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="font-size:0.8rem;color:#38bdf8;font-weight:700;">📂 현재 컴퓨터 경로:</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="remote-pc-folder-path-input" value="C:\Users\Public\Downloads\신세계" style="flex:1;background:#090d16;border:1px solid #334155;border-radius:8px;padding:8px 12px;color:#5eead4;font-family:monospace;font-size:0.88rem;">
+          <button class="btn btn-primary btn-sm" onclick="fetchPcDirectoryContents(document.getElementById('remote-pc-folder-path-input').value)" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-color:#38bdf8;font-weight:700;">🔍 이동</button>
+        </div>
+        
+        <!-- Quick Favorites 1-Click Taps -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <button class="btn btn-secondary btn-sm" onclick="fetchPcDirectoryContents('C:\\Users\\Public\\Downloads\\신세계')" style="padding:3px 8px;font-size:0.75rem;border-color:#38bdf8;color:#38bdf8;">📁 신세계</button>
+          <button class="btn btn-secondary btn-sm" onclick="fetchPcDirectoryContents('C:\\Users\\chlxo\\Desktop')" style="padding:3px 8px;font-size:0.75rem;border-color:#a855f7;color:#d8b4fe;">💻 바탕화면</button>
+          <button class="btn btn-secondary btn-sm" onclick="fetchPcDirectoryContents('C:\\Users\\chlxo\\Downloads')" style="padding:3px 8px;font-size:0.75rem;border-color:#34d399;color:#6ee7b7;">📥 다운로드</button>
+          <button class="btn btn-secondary btn-sm" onclick="fetchPcDirectoryContents('C:\\Users\\chlxo\\Documents')" style="padding:3px 8px;font-size:0.75rem;border-color:#f59e0b;color:#fcd34d;">📄 문서</button>
+          <button class="btn btn-secondary btn-sm" onclick="fetchPcDirectoryContents('C:\\')" style="padding:3px 8px;font-size:0.75rem;">💽 C: 드라이브</button>
+        </div>
+      </div>
+
+      <!-- Folder Navigation List Container -->
+      <div id="remote-pc-folder-list-box" style="flex:1;min-height:220px;max-height:340px;background:#080c14;border:1px solid #1e293b;border-radius:10px;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+        <div style="color:#94a3b8;font-size:0.85rem;text-align:center;padding:30px 0;">⚡ 컴퓨터 폴더 경로 조회 중...</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #1e293b;">
+        <span style="font-size:0.78rem;color:#94a3b8;">* 결정한 폴더의 전체 파일이 파일 탐색기 및 AI에 실시간 연동됩니다.</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="closeRemotePcFolderModal()">취소</button>
+          <button class="btn btn-primary btn-sm" onclick="confirmSelectRemotePcFolder()" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#34d399;font-weight:700;padding:6px 16px;">✅ 이 폴더로 결정하여 연결</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📜 Saved Session History Drawer Modal Overlay -->
+  <div class="acc-modal-overlay" id="session-history-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog" style="width:660px;max-width:96vw;display:flex;flex-direction:column;gap:14px;max-height:85vh;">
+      <div class="acc-modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.4rem;">📜</span>
+          <h2>이전 대화 &amp; 작업 히스토리 불러오기</h2>
+        </div>
+        <button class="btn-close-modal" onclick="closeSessionHistoryModal()">&times;</button>
+      </div>
+
+      <!-- Search & Controls -->
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;position:relative;">
+          <input type="text" id="session-search-input" placeholder="🔍 이전 대화 제목 또는 키워드 검색..." style="width:100%;background:#0b0f19;border:1px solid #334155;border-radius:10px;padding:9px 14px;color:#ffffff;font-size:0.88rem;outline:none;" oninput="filterSessionHistoryList(this.value)">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="createNewSessionFromModal()" style="background:linear-gradient(135deg, #10b981, #059669);border-color:#34d399;font-weight:700;padding:8px 14px;">
+          <span>➕ 새 대화 시작</span>
+        </button>
+      </div>
+
+      <!-- Session Items Container -->
+      <div id="session-history-list-container" style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:55vh;padding-right:4px;">
+        <div style="text-align:center;padding:24px;color:#94a3b8;font-size:0.9rem;">
+          이전 대화 히스토리를 불러오고 있습니다...
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #3d3734;">
+        <span style="font-size:0.78rem;color:#64748b;">* 모든 세션 및 대화 내역은 내 컴퓨터(PC)에 안전하게 저장됩니다.</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeSessionHistoryModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Changelog & Update History Modal Overlay -->
+  <div class="acc-modal-overlay" id="changelog-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog" style="width:640px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;">
+      <div class="acc-modal-header" style="margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.3rem;">📢</span>
+          <h2>업데이트 내역 &amp; 릴리즈 패치노트</h2>
+        </div>
+        <button class="btn-close-modal" onclick="closeChangelogModal()">닫기</button>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding-right:6px;display:flex;flex-direction:column;gap:14px;">
+        <!-- Release Card: v2.5.0 (Latest) -->
+        <div style="background:#211e1c;border:1.5px solid #7c3aed;border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge-emerald" style="font-weight:800;font-size:0.82rem;">v2.5.0 Latest</span>
+              <span style="font-weight:700;color:#ffffff;font-size:0.95rem;">보안 로그인 &amp; 파일 관리자 전면 개편</span>
+            </div>
+            <span style="font-size:0.75rem;color:#94a3b8;">2026.09</span>
+          </div>
+          <ul style="padding-left:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.7;">
+            <li><strong>🔒 비밀번호 보안 로그인 (`102030`)</strong>: 데스크톱 프로그램 실행 시 전용 PIN 잠금화면 탑재.</li>
+            <li><strong>📂 윈도우 파일 탐색기 연동</strong>: 내 PC `신세계` 폴더 윈도우 탐색기 창 1-클릭 실행.</li>
+            <li><strong>📁 로컬 파일 생성/수정 관리자</strong>: 파일명/폴더 경로 지정하여 파일 내용 읽기 및 생성/수정.</li>
+            <li><strong>💾 새로고침 시 대화/설정 영구 보존</strong>: F5 새로고침을 해도 대화 내용 100% 자동 유지.</li>
+            <li><strong>📱 UI 짤림 방지 반응형 레이아웃</strong>: 좁은 화면에서도 버튼과 텍스트가 찌그러지지 않도록 최적화.</li>
+          </ul>
+        </div>
+
+        <!-- Release Card: v2.0.0 -->
+        <div style="background:#181615;border:1px solid #3d3734;border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge-purple" style="font-weight:800;font-size:0.82rem;">v2.0.0</span>
+              <span style="font-weight:700;color:#ffffff;font-size:0.95rem;">3D 블렌더 스튜디오 &amp; 파일 첨부</span>
+            </div>
+            <span style="font-size:0.75rem;color:#94a3b8;">2026.09</span>
+          </div>
+          <ul style="padding-left:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.7;">
+            <li><strong>🎨 3D 블렌더 애니메이션 제너레이터</strong>: Blender Python 스크립트(`bpy`) 및 3D WebGL 실시간 시뮬레이션.</li>
+            <li><strong>📎 파일 첨부 시스템</strong>: 코드, 문서, 이미지 드래그&amp;드롭 및 Vision 비전 분석 지원.</li>
+            <li><strong>⚡ 시스템 터미널 제어 권한</strong>: 100% Root Exec 권한으로 내 PC 명령어 실행.</li>
+            <li><strong>📊 실시간 토큰 충전 모니터</strong>: 5시간 100% 충전 주기 및 잔여 한도 대시보드.</li>
+          </ul>
+        </div>
+
+        <!-- Release Card: v1.0.0 -->
+        <div style="background:#181615;border:1px solid #3d3734;border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge-pro" style="font-weight:800;font-size:0.82rem;">v1.0.0</span>
+              <span style="font-weight:700;color:#ffffff;font-size:0.95rem;">하이브리드 AI 브라우저 &amp; 계정 풀 엔진</span>
+            </div>
+            <span style="font-size:0.75rem;color:#94a3b8;">2026.09</span>
+          </div>
+          <ul style="padding-left:18px;font-size:0.85rem;color:#cbd5e1;line-height:1.7;">
+            <li><strong>🔑 무제한 Pro 계정 풀 자동 갈아타기</strong>: 5시간 쿼터 초과 시 다음 계정으로 자동 우회.</li>
+            <li><strong>🤖 멀티 모델 하이브리드 엔진</strong>: Claude 3.7 Sonnet + Claude Sonnet 5 + Qwen 2.5 로컬 AI.</li>
+            <li><strong>💧 Pretendard 프리미엄 타이포그래피</strong>: 고대비 다크 글래스모피즘 디자인 시스템.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="padding-top:12px;border-top:1px solid #3d3734;display:flex;justify-content:flex-end;">
+        <button class="btn btn-secondary btn-sm" onclick="closeChangelogModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚀 1-Click Auto-Updater & Upgrade Modal Overlay -->
+  <div class="acc-modal-overlay" id="update-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog" style="width:580px;max-width:96vw;display:flex;flex-direction:column;gap:14px;">
+      <div class="acc-modal-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.3rem;">🚀</span>
+          <h2>프로그램 1-클릭 최신 버전 업그레이드</h2>
+        </div>
+        <button class="btn-close-modal" onclick="closeUpdateModal()">닫기</button>
+      </div>
+
+      <div style="background:#181615;border:1.5px solid #10b981;border-radius:12px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <span style="font-size:0.8rem;color:#94a3b8;">현재 설치된 버전</span>
+            <div style="font-weight:700;font-size:1.05rem;color:#cbd5e1;">v2.5.0</div>
+          </div>
+          <div style="font-size:1.5rem;color:#10b981;">➔</div>
+          <div>
+            <span style="font-size:0.8rem;color:#34d399;font-weight:700;">✨ 업그레이드 최신 버전</span>
+            <div style="font-weight:800;font-size:1.15rem;color:#34d399;">v2.6.0 Pro Enterprise</div>
+          </div>
+        </div>
+
+        <div style="font-size:0.85rem;color:#cbd5e1;line-height:1.6;border-top:1px solid #334155;padding-top:10px;">
+          <strong style="color:#ffffff;">🎁 v2.6.0 신규 업데이트 내용:</strong>
+          <ul style="padding-left:18px;margin-top:6px;font-size:0.82rem;color:#94a3b8;">
+            <li>⚡ 0.5초 즉각 응답 초고속 엔진 &amp; Failover 가속화</li>
+            <li>🎙️ 실시간 한국어 음성 인식 (STT) 마이크 입력</li>
+            <li>🔊 자비스(Jarvis) AI 보이스 TTS 실시간 낭독</li>
+            <li>🔒 PIN 비밀번호(102030) 보안 로그인 세션 탑재</li>
+            <li>📂 윈도우 파일 탐색기 및 파일 생성/수정 관리자</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Live Download & Progress Bar Area -->
+      <div id="update-progress-section" style="display:none;background:#090d16;border:1px solid #334155;border-radius:10px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:0.82rem;">
+          <span id="update-status-text" style="color:#38bdf8;font-weight:700;">다운로드 및 패치 적용 중...</span>
+          <span id="update-percent-text" style="color:#34d399;font-weight:800;font-family:monospace;">0%</span>
+        </div>
+        <div style="width:100%;height:10px;background:#1e293b;border-radius:5px;overflow:hidden;">
+          <div id="update-progress-bar" style="width:0%;height:100%;background:linear-gradient(90deg, #10b981, #06b6d4);border-radius:5px;transition:width 0.2s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #3d3734;">
+        <span style="font-size:0.8rem;color:#64748b;">* 업그레이드 시 바탕화면 실행 파일이 최신 버전으로 자동 갱신됩니다.</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="closeUpdateModal()">나중에</button>
+          <button class="btn btn-primary btn-sm" id="btn-start-upgrade" onclick="performOneClickUpdate()" style="background:linear-gradient(135deg, #10b981, #059669);border-color:#34d399;font-weight:800;padding:8px 16px;">
+            <span>🚀 1-클릭 다운로드 &amp; 즉시 업그레이드</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 Mobile PWA Service Worker Registration & Mobile View Tab Switching -->
+  <div class="mobile-view-tabs" id="mobile-bottom-nav">
+    <div class="mobile-tab-btn active" id="mob-tab-chat" onclick="switchMobileView('chat')">💬 AI 대화</div>
+    <div class="mobile-tab-btn" id="mob-tab-preview" onclick="switchMobileView('preview')">🎨 3D/웹 프리뷰</div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('[PWA ServiceWorker] Registered successfully:', reg.scope);
+        }).catch((err) => {
+          console.warn('[PWA ServiceWorker] Registration failed:', err);
+        });
+      });
+    }
+
+    function switchMobileView(viewName) {
+      const leftPane = document.getElementById('pane-left');
+      const rightPane = document.querySelector('.workspace-pane-right');
+      const btnChat = document.getElementById('mob-tab-chat');
+      const btnPreview = document.getElementById('mob-tab-preview');
+
+      if (viewName === 'chat') {
+        if (leftPane) leftPane.classList.remove('mobile-hidden');
+        if (rightPane) rightPane.classList.remove('mobile-active');
+        if (btnChat) btnChat.classList.add('active');
+        if (btnPreview) btnPreview.classList.remove('active');
+      } else {
+        if (leftPane) leftPane.classList.add('mobile-hidden');
+        if (rightPane) rightPane.classList.add('mobile-active');
+        if (btnChat) btnChat.classList.remove('active');
+        if (btnPreview) btnPreview.classList.add('active');
+      }
+    }
+
+    // 📱 Native Smartphone Horizontal Touch Swipe Gesture (Swipe Left / Right to switch tabs)
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      // Exclude interactive elements, model selectors, toolbars & buttons from page tab swipe
+      if (e.target.closest('select, input, button, textarea, .chat-input-toolbar, .mobile-app-header-strip, .browser-window-bar, .browser-nav-bar')) {
+        touchStartX = 0;
+        touchStartY = 0;
+        return;
+      }
+      if (e.touches && e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      if (touchStartX === 0) return; // Ignore toolbar & selector drags
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      touchStartX = 0;
+
+      // Ensure horizontal swipe (deltaX > 80px) and not vertical scroll (|deltaY| < 50px)
+      if (Math.abs(deltaX) > 80 && Math.abs(deltaY) < 50) {
+        if (deltaX < 0) {
+          // Swipe Left -> Switch to 3D Preview Tab
+          switchMobileView('preview');
+        } else {
+          // Swipe Right -> Switch to AI Chat Tab
+          switchMobileView('chat');
+        }
+      }
+    }, { passive: true });
+  </script>
+  <script src="water-ripple.js"></script>
+  <script src="browser.js?v=50000000"></script>
+</body>
+</html>

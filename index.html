@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mikoran AI Gateway - Admin Console</title>
+  
+  <!-- Mikoran High-Tech Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+
+  <!-- Login Modal Overlay -->
+  <div class="modal-backdrop open" id="login-modal" style="z-index: 1000;">
+    <div class="modal-dialog" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3>🔒 Mikoran AI 관리자 로그인</h3>
+      </div>
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>관리자 비밀번호 (Admin Password)</label>
+            <input type="password" id="admin-password-input" required placeholder="비밀번호 입력 (기본: admin1234)">
+          </div>
+          <div id="login-error" style="color:var(--accent-rose);font-size:0.85rem;display:none;margin-top:6px;"></div>
+        </div>
+        <div class="modal-footer">
+          <a href="/" class="btn btn-secondary" style="margin-right:auto;text-decoration:none;">홈으로</a>
+          <button type="submit" class="btn btn-primary">로그인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-layout" id="admin-app-layout" style="display:none;">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-title">Mikoran AI</span>
+          <span class="brand-subtitle">Admin Console</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          <span>대시보드 개요</span>
+        </button>
+        <button class="nav-item" data-tab="accounts" onclick="openAccountModalAdmin()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Pro 계정 풀 관리 (Auto-Switch)</span>
+          <span class="badge" style="background:#e07038;color:#fff;" id="badge-accounts">🔑 계정</span>
+        </button>
+        <button class="nav-item" data-tab="channels">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          <span>업스트림 채널 관리</span>
+          <span class="badge" id="badge-channels">1</span>
+        </button>
+        <button class="nav-item" data-tab="tokens">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <span>클라이언트 토큰 발급</span>
+          <span class="badge" id="badge-tokens">2</span>
+        </button>
+        <button class="nav-item" data-tab="mappings">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="8 21 3 21 3 16"/><line x1="15" y1="15" x2="3" y2="21"/></svg>
+          <span>모델 리매핑</span>
+        </button>
+        <button class="nav-item" data-tab="logs">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 14 15 20 9"/><line x1="20" y1="14" x2="20" y2="9"/><line x1="15" y1="9" x2="20" y2="9"/></svg>
+          <span>실시간 요청 로그</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:12px;" onclick="handleAdminLogout()">로그아웃</button>
+        <div class="status-indicator">
+          <span class="status-dot pulse"></span>
+          <span>Mikoran Gateway Active</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-title">
+          <h1 id="page-title">대시보드 개요</h1>
+          <p id="page-subtitle">실시간 게이트웨이 트래픽 및 시스템 상태를 모니터링합니다.</p>
+        </div>
+        <div class="header-actions">
+          <a href="/browser" class="btn btn-primary" style="text-decoration:none;background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan));">개인 AI 브라우저 실행 🚀</a>
+          <a href="/" class="btn btn-secondary" style="text-decoration:none;">공개 사이트 이동</a>
+          <button class="btn btn-secondary" id="btn-refresh">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>새로고침</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View 1: Overview -->
+      <section id="view-overview" class="view-panel active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">총 요청 수</span>
+              <span class="stat-value" id="stat-total-requests">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">총 처리된 토큰</span>
+              <span class="stat-value" id="stat-total-tokens">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon emerald">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">성공률</span>
+              <span class="stat-value" id="stat-success-rate">100%</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">활성 클라이언트 키</span>
+              <span class="stat-value" id="stat-active-tokens">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Pool Quota Auto-Switch Banner Card -->
+        <div class="card glass-card" style="border-color:#e07038;background:rgba(224,112,56,0.06);">
+          <div class="card-header">
+            <h3 style="color:#ffffff;display:flex;align-items:center;gap:8px;">
+              <span>🔑 Pro 계정 풀 자동 갈아타기 (Auto-Switch Engine)</span>
+            </h3>
+            <button class="btn btn-secondary btn-sm" style="background:#e07038;color:#fff;border:none;" onclick="openAccountModalAdmin()">계정 관리 창 열기 🔑</button>
+          </div>
+          <div class="card-body">
+            <p class="text-muted mb-3">5시간 할당량이 100%에 도달하면 멈추지 않고 대기 중인 다음 Pro 계정으로 자동 우회하여 세션 맥락을 100% 보존합니다.</p>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>계정 식별명</th>
+                    <th>상태</th>
+                    <th>5시간 할당량</th>
+                    <th>주간 할당량</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-account-pool-table">
+                  <!-- JS Rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integration Code Snippet Card -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>🔌 Mikoran 게이트웨이 연동 가이드</h3>
+            <span class="badge-emerald">무제한 토큰 모드 활성화됨</span>
+          </div>
+          <div class="card-body">
+            <p>이 커스텀 게이트웨이는 Claude Code, VS Code 및 Anthropic SDK와 100% 호환됩니다.</p>
+            <div class="code-box">
+              <div class="code-box-header">
+                <span>PowerShell / Cmd 연동 명령어 (운영 도메인 예시: https://api.mikoran.cc)</span>
+                <button class="btn-copy" onclick="copyCode('env-cmd')">복사</button>
+              </div>
+              <pre id="env-cmd"><code>[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'http://localhost:3000', 'User')
+[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'sk-gateway-unlimited-demo-key', 'User')</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 2: Channels -->
+      <section id="view-channels" class="view-panel">
+        <div class="action-bar">
+          <div>
+            <h2>업스트림 채널 (Upstream Providers)</h2>
+            <p class="text-muted">실제 AI 요청을 처리할 상위 API 서버와 키 풀을 등록합니다.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openChannelModal()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>신규 채널 추가</span>
+          </button>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-body">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>채널명</th>
+                    <th>타입</th>
+                    <th>Base URL</th>
+                    <th>API Key (마스킹)</th>
+                    <th>지원 모델</th>
+                    <th>성공/에러</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                  </tr>
+                </thead>
+                <tbody id="channels-table-body">
+                  <!-- Dynamic JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 3: Tokens -->
+      <section id="view-tokens" class="view-panel">
+        <div class="action-bar">
+          <div>
+            <h2>클라이언트 API 토큰 발급</h2>
+            <p class="text-muted">Claude Code나 앱에서 사용할 인증 키(`sk-...`)를 발급하고 무제한/제한 할당량을 지정합니다.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openTokenModal()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>새 API 키 생성</span>
+          </button>
+        </div>
+
+        <div class="card glass-card" style="margin-bottom:20px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-weight:600;color:#fff;font-size:0.9rem;">🌐 게이트웨이 Base URL (ANTHROPIC_BASE_URL):</span>
+            <code id="admin-gateway-url-display">http://localhost:3000</code>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="copyText(window.location.origin)">
+            <span>게이트웨이 URL 복사</span>
+          </button>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-body">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>토큰 이름</th>
+                    <th>API Key & 게이트웨이 URL</th>
+                    <th>사용 할당량</th>
+                    <th>생성일시</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                  </tr>
+                </thead>
+                <tbody id="tokens-table-body">
+                  <!-- Dynamic JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 4: Model Mappings -->
+      <section id="view-mappings" class="view-panel">
+        <div class="action-bar">
+          <div>
+            <h2>모델 별칭 리매핑 (Model Aliases)</h2>
+            <p class="text-muted">클라이언트에서 요구나 요청하는 모델명을 업스트림 지원 모델명으로 변경합니다.</p>
+          </div>
+          <button class="btn btn-primary" onclick="addMappingRow()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>매핑 규칙 추가</span>
+          </button>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-body">
+            <form id="mappings-form" onsubmit="saveMappings(event)">
+              <div id="mappings-container" class="mappings-grid">
+                <!-- Dynamic JS -->
+              </div>
+              <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-success">매핑 설정 저장</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 5: Logs -->
+      <section id="view-logs" class="view-panel">
+        <div class="action-bar">
+          <div>
+            <h2>실시간 트래픽 로그</h2>
+            <p class="text-muted">게이트웨이를 통과한 모든 API 요청의 상세 기록을 실시간으로 모니터링합니다.</p>
+          </div>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-body">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>시간</th>
+                    <th>메서드 & 경로</th>
+                    <th>요청 모델 ➔ 매핑 모델</th>
+                    <th>채널</th>
+                    <th>상태</th>
+                    <th>토큰 (In/Out)</th>
+                    <th>소요시간</th>
+                  </tr>
+                </thead>
+                <tbody id="full-logs-table-body">
+                  <!-- Dynamic JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Exact High-Fidelity Account Management Modal (Matching User Screenshot) -->
+  <div class="acc-modal-overlay" id="admin-account-modal-overlay" style="display:none;">
+    <div class="acc-modal-dialog">
+      <div class="acc-modal-header">
+        <h2>계정</h2>
+        <button class="btn-close-modal" onclick="closeAccountModalAdmin()">닫기</button>
+      </div>
+
+      <!-- Account List Container -->
+      <div id="admin-modal-account-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Add New Account Form Toggle -->
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #2e2a28;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.85rem;color:#88827e;">+ 새 Pro API 계정 추가</span>
+        <button class="btn-acc-action" style="background:#e07038;color:#fff;border:none;" onclick="addNewAccountAdmin()">+ 계정 등록</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="water-ripple.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

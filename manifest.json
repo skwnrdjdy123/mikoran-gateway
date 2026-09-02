@@ -1,0 +1,24 @@
+{
+  "name": "Mikoran AI Browser",
+  "short_name": "Mikoran",
+  "description": "Personal AI Browser & Hands-Free Multi-AI Platform",
+  "start_url": "/browser",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/mikoran.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mikoran.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
