@@ -377,7 +377,7 @@ const shapeGenerators = [
 
 function changeParticleCount(newCount) {
   count = parseInt(newCount, 10) || 1500;
-  count = Math.max(100, Math.min(20000, cnt));
+  count = Math.max(100, Math.min(20000, count));
   particles = initBaseParticles(count);
   const input = document.getElementById('particle-input');
   if (input) input.value = count;
