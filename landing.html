@@ -207,24 +207,24 @@
         
         <form onsubmit="handleKeyRequest(event)" id="key-request-form">
           <div class="form-group mb-3">
-            <label>프로젝트 / 개발자 이름</label>
-            <input type="text" id="req-name" required placeholder="예: Hong Gildong or My App" style="width:100%;">
+            <label for="req-name">프로젝트 / 개발자 이름</label>
+            <input type="text" id="req-name" required autocomplete="organization-title" placeholder="예: Hong Gildong or My App" style="width:100%;">
           </div>
           <div class="form-group mb-3">
-            <label>이메일 주소 (선택)</label>
-            <input type="email" id="req-email" placeholder="user@example.com" style="width:100%;">
+            <label for="req-email">이메일 주소 (선택)</label>
+            <input type="email" id="req-email" autocomplete="email" placeholder="user@example.com" style="width:100%;">
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:10px;">
+          <button type="submit" class="btn btn-primary" id="btn-key-submit" style="width:100%;padding:12px;margin-top:10px;">
             API Key 생성하기
           </button>
         </form>
 
         <!-- Result Box with 1-Click Copy UI -->
-        <div id="key-result" style="display:none;margin-top:20px;">
+        <div id="key-result" style="display:none;margin-top:20px;" aria-live="polite">
           <div class="code-box">
             <div class="code-box-header">
               <span>🔑 생성된 Mikoran API Key</span>
-              <button class="btn-copy" onclick="copyResultKey()">API Key 복사</button>
+              <button type="button" class="btn-copy" onclick="copyResultKey()">API Key 복사</button>
             </div>
             <pre><code id="generated-key-display">sk-gw-...</code></pre>
           </div>
@@ -232,7 +232,7 @@
           <div class="code-box" style="margin-top:12px;">
             <div class="code-box-header">
               <span>🌐 게이트웨이 사이트 URL (ANTHROPIC_BASE_URL)</span>
-              <button class="btn-copy" onclick="copyGatewayUrl()">URL 복사</button>
+              <button type="button" class="btn-copy" onclick="copyGatewayUrl()">URL 복사</button>
             </div>
             <pre><code id="gateway-url-display">http://localhost:3000</code></pre>
           </div>
@@ -240,7 +240,7 @@
           <div class="code-box" style="margin-top:12px;">
             <div class="code-box-header">
               <span>💻 1-클릭 Claude Code 연동 명령어 (PowerShell)</span>
-              <button class="btn-copy" onclick="copyPsCommand()">연동 명령어 전체 복사</button>
+              <button type="button" class="btn-copy" onclick="copyPsCommand()">연동 명령어 전체 복사</button>
             </div>
             <pre><code id="ps-command-display">[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'http://localhost:3000', 'User')
 [System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'sk-gw-...', 'User')</code></pre>
@@ -259,7 +259,7 @@
       </div>
       <div class="card-body">
         <div class="form-group mb-3">
-          <label>사용할 모델 선택</label>
+          <label for="pg-model">사용할 모델 선택</label>
           <select id="pg-model">
             <option value="claude-3-7-sonnet">Claude 3.7 Sonnet (추천)</option>
             <option value="claude-sonnet-5">Claude Sonnet 5</option>
@@ -267,19 +267,19 @@
           </select>
         </div>
         <div class="form-group mb-3">
-          <label>프롬프트 입력</label>
+          <label for="pg-prompt">프롬프트 입력</label>
           <textarea id="pg-prompt" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border-color);border-radius:8px;padding:12px;color:#fff;font-family:var(--font-main);" placeholder="테스트할 질문을 입력하세요...">Mikoran AI 게이트웨이 연결 상태를 확인하기 위한 테스트 메시지입니다. 1문장으로 짧게 인사해줘.</textarea>
         </div>
-        <button onclick="runPlaygroundTest()" class="btn btn-success" id="btn-pg-submit">
+        <button type="button" onclick="runPlaygroundTest()" class="btn btn-success" id="btn-pg-submit">
           <span>테스트 실행 🚀</span>
         </button>
 
         <div class="code-box" style="margin-top:20px;">
           <div class="code-box-header">
             <span>응답 결과 (Response Output)</span>
-            <span id="pg-status" class="text-muted">대기 중</span>
+            <span id="pg-status" class="text-muted" aria-live="polite">대기 중</span>
           </div>
-          <pre><code id="pg-output">// 실행 결과가 여기에 표시됩니다.</code></pre>
+          <pre aria-live="polite"><code id="pg-output">// 실행 결과가 여기에 표시됩니다.</code></pre>
         </div>
       </div>
     </div>
@@ -305,6 +305,10 @@
       e.preventDefault();
       const name = document.getElementById('req-name').value;
       const email = document.getElementById('req-email').value;
+      const btn = document.getElementById('btn-key-submit');
+      const originalLabel = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '생성 중...';
 
       try {
         const res = await fetch('/api/admin/request-key', {
@@ -322,11 +326,15 @@
           document.getElementById('ps-command-display').textContent = psCode;
           
           document.getElementById('key-result').style.display = 'block';
+          document.getElementById('key-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           alert('키 생성 실패: ' + data.error);
         }
       } catch (err) {
         alert('에러 발생: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
       }
     }
 

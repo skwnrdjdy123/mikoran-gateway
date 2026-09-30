@@ -800,11 +800,11 @@
       <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:24px;">보안 데스크톱 워크스페이스 로그인</p>
 
       <div style="margin-bottom:16px;text-align:left;">
-        <label style="display:block;font-size:0.82rem;color:#cbd5e1;font-weight:700;margin-bottom:6px;">비밀번호 (PIN)</label>
+        <label for="lockscreen-pin-input" style="display:block;font-size:0.82rem;color:#cbd5e1;font-weight:700;margin-bottom:6px;">비밀번호 (PIN)</label>
         <div style="display:flex;position:relative;">
-          <input type="password" id="lockscreen-pin-input" placeholder="비밀번호 입력..." style="width:100%;background:#0b0f19;border:1.5px solid #334155;border-radius:10px;padding:12px 16px;color:#ffffff;font-size:1.1rem;letter-spacing:0.2em;font-family:monospace;outline:none;" onkeydown="handleLoginPinKeyDown(event)">
+          <input type="password" id="lockscreen-pin-input" placeholder="비밀번호 입력..." autocomplete="current-password" style="width:100%;background:#0b0f19;border:1.5px solid #334155;border-radius:10px;padding:12px 16px;color:#ffffff;font-size:1.1rem;letter-spacing:0.2em;font-family:monospace;outline:none;" onkeydown="handleLoginPinKeyDown(event)">
         </div>
-        <span id="lockscreen-error-msg" style="display:none;color:#ef4444;font-size:0.8rem;margin-top:6px;font-weight:600;">⚠️ 비밀번호가 일치하지 않습니다.</span>
+        <span id="lockscreen-error-msg" role="alert" style="display:none;color:#ef4444;font-size:0.8rem;margin-top:6px;font-weight:600;">⚠️ 비밀번호가 일치하지 않습니다.</span>
       </div>
 
       <button class="btn btn-primary" style="width:100%;padding:12px;font-size:1rem;font-weight:700;border-radius:10px;background:linear-gradient(135deg, #7c3aed, #6366f1);border:1px solid #a78bfa;box-shadow:0 6px 20px rgba(124,58,237,0.4);cursor:pointer;" onclick="submitLockscreenPin()">
@@ -1287,7 +1287,7 @@
           <input type="file" id="tr-photo-input" accept="image/*" style="display:none;" onchange="handleTransferPhotoSelected(event)">
         </div>
         <div id="tr-photo-preview-box" style="display:none;align-items:center;gap:12px;background:#0d1322;padding:10px;border-radius:8px;border:1px solid #334155;">
-          <img id="tr-photo-preview-img" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid #38bdf8;">
+          <img id="tr-photo-preview-img" alt="전송할 사진 미리보기" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid #38bdf8;">
           <div style="flex:1;">
             <div id="tr-photo-filename" style="font-size:0.85rem;font-weight:bold;color:#fff;">photo.png</div>
             <div id="tr-photo-filesize" style="font-size:0.75rem;color:#94a3b8;">0 KB</div>

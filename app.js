@@ -529,6 +529,21 @@ function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('open');
 }
 
+// Dismiss admin dialogs via Escape or backdrop click (login stays modal).
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  ['modal-channel', 'modal-token'].forEach((id) => {
+    document.getElementById(id)?.classList.remove('open');
+  });
+  closeAccountModalAdmin();
+});
+
+['modal-channel', 'modal-token'].forEach((id) => {
+  document.getElementById(id)?.addEventListener('mousedown', (e) => {
+    if (e.target?.id === id) closeModal(id);
+  });
+});
+
 function toggleQuotaInput() {
   const val = document.getElementById('token-quota-type').value;
   document.getElementById('quota-input-group').style.display = val === 'custom' ? 'block' : 'none';
@@ -597,13 +612,37 @@ async function deleteToken(id) {
   }
 }
 
-function copyCode(id) {
-  const code = document.getElementById(id).innerText;
-  navigator.clipboard.writeText(code);
-  alert('코드가 클립보드에 복사되었습니다.');
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    // Fallback for non-secure contexts where navigator.clipboard is unavailable.
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (fallbackErr) {
+      ok = false;
+    }
+    ta.remove();
+    return ok;
+  }
 }
 
-function copyText(text) {
-  navigator.clipboard.writeText(text);
-  alert('클립보드에 복사되었습니다: ' + text);
+async function copyCode(id) {
+  const code = document.getElementById(id).innerText;
+  const ok = await copyToClipboard(code);
+  alert(ok ? '코드가 클립보드에 복사되었습니다.' : '복사에 실패했습니다. 직접 선택해 복사해주세요.');
+}
+
+async function copyText(text) {
+  const ok = await copyToClipboard(text);
+  alert(ok ? '클립보드에 복사되었습니다: ' + text : '복사에 실패했습니다. 직접 선택해 복사해주세요.');
 }
